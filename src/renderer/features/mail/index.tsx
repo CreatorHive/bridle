@@ -98,7 +98,23 @@ export function MailScreen() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  const update = (id: string, change: Partial<Mail>) => setMail((mail) => mail.map((m) => (m.id === id ? { ...m, ...change } : m)))
+  const local = (id: string, change: Partial<Mail>) => setMail((mail) => mail.map((m) => (m.id === id ? { ...m, ...change } : m)))
+  /** Read and star changes go to Gmail too; if Gmail says no, the message goes back as it was. */
+  const update = (id: string, change: Partial<Mail>) => {
+    const m = mailRef.current.find((x) => x.id === id)
+    local(id, change)
+    if (!m?.gmailID) return
+    const add: string[] = []
+    const remove: string[] = []
+    if (change.unread !== undefined && change.unread !== m.unread) (change.unread ? add : remove).push('UNREAD')
+    if (change.starred !== undefined && change.starred !== m.starred) (change.starred ? add : remove).push('STARRED')
+    if (add.length || remove.length) window.bridle.gmail.label(m.account, m.gmailID, add, remove).catch((e) => fail(e, () => local(id, m)))
+  }
+  const fail = (e: unknown, undo: () => void) => {
+    undo()
+    setError(message(e))
+    play('error', { emphasis: 'subtle' })
+  }
   const open = (id: string) => {
     setMailId(id)
     update(id, { unread: false })
@@ -109,9 +125,15 @@ export function MailScreen() {
     play('select', { direction: by })
     open(shown[i + by].id)
   }
+  /** Archive (out of the Inbox) or Trash, in Gmail; a failure puts the message back. */
   const remove = (id: string, archive: boolean) => {
+    const m = mailRef.current.find((x) => x.id === id)
+    if (!m) return
     step(1)
-    setMail((mail) => (archive ? mail.map((m) => (m.id === id ? { ...m, mailbox: 'Archive' as const } : m)) : mail.filter((m) => m.id !== id)))
+    setMail((mail) => mail.map((x) => (x.id === id ? { ...x, mailbox: archive ? 'Archive' as const : 'Trash' as const } : x)))
+    if (!m.gmailID) return
+    const write = archive ? window.bridle.gmail.label(m.account, m.gmailID, [], ['INBOX']) : window.bridle.gmail.trash(m.account, m.gmailID)
+    write.catch((e) => fail(e, () => local(id, m)))
   }
 
   const selected = state.mail.find((m) => m.id === mailId)

@@ -121,6 +121,10 @@ export interface BridleAPI {
     /** One mailbox (25 newest) for one Gmail address, or every connected one when `account` is null,
      *  newest first. */
     load(mailbox: Mailbox, account: string | null): Promise<Mail[]>
+    /** Adds and removes labels on one message of `account` (archive = remove INBOX, read = remove UNREAD). */
+    label(account: string, gmailID: string, add: string[], remove: string[]): Promise<void>
+    /** Moves one message to the Trash. */
+    trash(account: string, gmailID: string): Promise<void>
   }
 
   /** Google Calendar over Composio. */
@@ -451,7 +455,7 @@ export const API_METHODS: { [G in GroupName]: { [M in keyof InvokeAPI[G]]: true 
   settings: { all: true, get: true, set: true },
   keychain: { get: true, set: true },
   composio: { accounts: true, link: true, cancelLink: true, disconnect: true, execute: true, mcpServer: true },
-  gmail: { load: true },
+  gmail: { load: true, label: true, trash: true },
   calendar: { events: true, rsvp: true },
   tasks: {
     list: true, add: true, update: true, move: true, delete: true,

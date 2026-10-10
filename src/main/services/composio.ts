@@ -462,11 +462,23 @@ export async function fetchMail(box: Mailbox, account: string, grant: string): P
   return (data.messages ?? []).map((m) => toMail(m, box, account))
 }
 
+async function gmailGrant(account: string): Promise<string> {
+  const g = (await grants('gmail')).find((a) => a.login === account)
+  if (!g) throw new Error(`${account} isn't connected to Gmail`)
+  return g.grant
+}
+
 export const gmail: BridleAPI['gmail'] = {
   async load(mailbox, account) {
     const picked = (await grants('gmail')).filter((a) => account === null || a.login === account)
     const fetched = (await Promise.all(picked.map((a) => fetchMail(mailbox, a.login, a.grant)))).flat()
     return fetched.sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''))
+  },
+  async label(account, gmailID, add, remove) {
+    await execute('GMAIL_ADD_LABEL_TO_EMAIL', { message_id: gmailID, add_label_ids: add, remove_label_ids: remove }, await gmailGrant(account))
+  },
+  async trash(account, gmailID) {
+    await execute('GMAIL_MOVE_TO_TRASH', { message_id: gmailID }, await gmailGrant(account))
   }
 }
 

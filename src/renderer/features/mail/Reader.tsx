@@ -27,7 +27,7 @@ export function ActionButton({ label, cue = 'tap', onClick, children }:
 
 type Mode = 'draft' | 'summary'
 
-/** ponytail: archive, delete, snooze and read state are local until Gmail writes land. */
+/** ponytail: snooze is local only; Gmail's API has no snooze. Archive, delete, read and star write to Gmail. */
 export function MailReader({ mail, update, previous, next, remove }: {
   mail: Mail
   update: (change: Partial<Mail>) => void

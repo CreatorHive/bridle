@@ -246,6 +246,9 @@ describe('agent approvals', () => {
     expect(describeTool('mcp__composio__X', { tools: [{ tool_slug: 'SLACK_SEND_MESSAGE' }, { tool_slug: 'GMAIL_SEND_EMAIL' }] }, '/w').title).toBe('Use 2 app actions?')
     expect(describeTool('Write', { file_path: '/w/notes/a.md' }, '/w')).toEqual({ title: 'Create a file?', detail: 'notes/a.md' })
     expect(trace('Read', { file_path: '/w/USER.md' }, '/w')).toBe('read USER.md')
+    expect(trace('Edit', { file_path: '/w/USER.md' }, '/w')).toBe('saved to memory · USER.md')
+    expect(trace('Write', { file_path: '/w/memory/2026-10-10.md' }, '/w')).toBe('saved to memory · memory/2026-10-10.md')
+    expect(trace('Write', { file_path: '/w/notes/USER.md' }, '/w')).toBe('write notes/USER.md')
     expect(trace('Bash', { command: 'x'.repeat(100) }, '/w')).toBe('bash ' + 'x'.repeat(79) + '…')
   })
 
