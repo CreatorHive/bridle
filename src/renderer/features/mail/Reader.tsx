@@ -27,7 +27,7 @@ export function ActionButton({ label, cue = 'tap', onClick, children }:
 
 type Mode = 'draft' | 'summary'
 
-/** ponytail: snooze is local only; Gmail's API has no snooze. Archive, delete, read and star write to Gmail. */
+/** ponytail: snooze is local only; Gmail's API has no snooze. Archive, delete, read, star and replies go to Gmail. */
 export function MailReader({ mail, update, previous, next, remove }: {
   mail: Mail
   update: (change: Partial<Mail>) => void
@@ -45,6 +45,24 @@ export function MailReader({ mail, update, previous, next, remove }: {
   const [editing, setEditing] = useState(false)
   const [sent, setSent] = useState(false)
   const run = useRef<string | null>(null)
+  const [sending, setSending] = useState(false)
+  const [sendError, setSendError] = useState<string | null>(null)
+
+  /** The reply goes out in the thread; sample mail (no gmailID) just shows Sent. */
+  const sendReply = async () => {
+    update({ draft: cardText })
+    setSending(true)
+    setSendError(null)
+    try {
+      if (mail.gmailID) await window.bridle.gmail.reply(mail.account, mail.gmailID, mail.email, cardText)
+      play('success')
+      setSent(true)
+    } catch (e) {
+      play('error')
+      setSendError(message(e))
+    }
+    setSending(false)
+  }
 
   // Leaving the message stops its stream.
   useEffect(() => () => { if (run.current) void window.bridle.agent.cancel(run.current) }, [])
@@ -188,10 +206,11 @@ export function MailReader({ mail, update, previous, next, remove }: {
                         <span className={css.sent}><CircleCheck size={15} />Sent</span>
                       ) : (
                         <>
+                          {sendError && <span className={css.error}>{sendError}</span>}
                           <Button className={css.pill} onClick={() => setEditing(!editing)}>{editing ? 'Done' : 'Edit'}</Button>
-                          {/* Sending leaves the workspace: this press is the approval. ponytail: local only. */}
-                          <Button cue="success" className={css.send} onClick={() => { update({ draft: cardText }); setSent(true) }}>
-                            <Send size={14} />Send
+                          {/* Sending leaves the workspace: this press is the approval. */}
+                          <Button cue={null} className={css.send} disabled={sending} onClick={() => void sendReply()}>
+                            <Send size={14} />{sending ? 'Sending…' : 'Send'}
                           </Button>
                         </>
                       )}

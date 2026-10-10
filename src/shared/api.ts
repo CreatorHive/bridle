@@ -125,6 +125,8 @@ export interface BridleAPI {
     label(account: string, gmailID: string, add: string[], remove: string[]): Promise<void>
     /** Moves one message to the Trash. */
     trash(account: string, gmailID: string): Promise<void>
+    /** Replies to `to` in the message's thread, from `account`. Your Send press is the approval. */
+    reply(account: string, gmailID: string, to: string, body: string): Promise<void>
   }
 
   /** Google Calendar over Composio. */
@@ -455,7 +457,7 @@ export const API_METHODS: { [G in GroupName]: { [M in keyof InvokeAPI[G]]: true 
   settings: { all: true, get: true, set: true },
   keychain: { get: true, set: true },
   composio: { accounts: true, link: true, cancelLink: true, disconnect: true, execute: true, mcpServer: true },
-  gmail: { load: true, label: true, trash: true },
+  gmail: { load: true, label: true, trash: true, reply: true },
   calendar: { events: true, rsvp: true },
   tasks: {
     list: true, add: true, update: true, move: true, delete: true,

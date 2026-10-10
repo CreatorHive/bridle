@@ -530,6 +530,14 @@ export const gmail: BridleAPI['gmail'] = {
   },
   async trash(account, gmailID) {
     await execute('GMAIL_MOVE_TO_TRASH', { message_id: gmailID }, await gmailGrant(account))
+  },
+  async reply(account, gmailID, to, body) {
+    const grant = await gmailGrant(account)
+    const m = (await execute('GMAIL_FETCH_MESSAGE_BY_MESSAGE_ID', { message_id: gmailID, format: 'metadata' }, grant)) as { threadId?: string; thread_id?: string }
+    const thread = m.threadId ?? m.thread_id
+    if (!thread) throw new Error("Couldn't find this email's thread in Gmail")
+    // No subject: Gmail would start a new conversation instead of replying in the thread.
+    await execute('GMAIL_REPLY_TO_THREAD', { thread_id: thread, recipient_email: to, message_body: body }, grant)
   }
 }
 
