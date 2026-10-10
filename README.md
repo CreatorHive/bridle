@@ -16,6 +16,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/CreatorHive/bridle/releases/latest"><strong>Download</strong></a> ·
   <a href="#run-it">Run it</a> ·
   <a href="#what-it-does">What it does</a> ·
   <a href="#your-workspace-is-just-a-folder">The workspace</a> ·
@@ -89,7 +90,6 @@ Bridle is early. Expect rough edges:
 
 - Email and event cards that appear under a reply don't send yet. Sending works through the agent's Gmail and
   Calendar tools, which ask you first.
-- No signed builds yet; run it from source.
 - Routines, Loops and task runs work while Bridle is open.
 
 ## Run it
@@ -103,7 +103,10 @@ You'll need:
 - Optional: a [Composio](https://composio.dev) API key for Gmail, Google Calendar, GitHub and Linear
   (Settings → Connections).
 
-There are no signed builds yet, so run it from source:
+**Download:** the latest signed and notarized DMG is on
+[Releases](https://github.com/CreatorHive/bridle/releases/latest) (Apple silicon, macOS 26 or later).
+
+**Or run it from source:**
 
 ```sh
 git clone https://github.com/creatorhive/bridle.git

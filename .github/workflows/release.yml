@@ -19,6 +19,14 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - name: Signing secrets are set
+        # Without them electron-builder would attach an unsigned DMG. Releases are built locally until they are
+        # (APPLE_KEYCHAIN_PROFILE=bridle npm run dist, then gh release create).
+        run: |
+          if [ -z "${{ secrets.MAC_CSC_LINK }}" ] || [ -z "${{ secrets.APPLE_ID }}" ]; then
+            echo "::error::Set MAC_CSC_LINK, MAC_CSC_KEY_PASSWORD, APPLE_ID and APPLE_APP_SPECIFIC_PASSWORD to release from CI."
+            exit 1
+          fi
       - run: npm ci
       - run: npm run build && npm run build:native
       - name: Package, sign, notarize, publish
