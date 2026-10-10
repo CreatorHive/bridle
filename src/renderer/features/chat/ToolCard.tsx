@@ -231,7 +231,7 @@ function DiffLines({ removed, added }: { removed?: string; added: string }) {
       {all.slice(0, CAP).map((line, i) => (
         <div key={sign + i} className={`${s.diffLine} ${cls}`}><span>{sign}</span><code>{line || ' '}</code></div>
       ))}
-      {all.length > CAP && <div className={`${s.diffLine} ${s.more} ${cls}`}>… {all.length - CAP} more lines</div>}
+      {all.length > CAP && <div className={`${s.diffLine} ${s.diffMore} ${cls}`}>… {all.length - CAP} more lines</div>}
     </>
   )
   return <div className={s.diff}>{lines(old, '−', s.removed)}{lines(next, '+', s.added)}</div>

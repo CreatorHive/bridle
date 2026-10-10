@@ -1,7 +1,7 @@
 // Pure chat logic (no React, no window.bridle). Everything here is covered by logic.test.ts.
 import {
   PROVIDERS, TASK_STATUSES,
-  type Account, type AgentAction, type ApprovalPolicy, type Chat, type Mail, type Message, type Settings
+  type Account, type AgentAction, type Chat, type Mail, type Message, type Settings
 } from '../../../shared/types'
 
 /** A random UUID, uppercase. */
@@ -14,13 +14,6 @@ export const now = (): string => new Date().toISOString().replace(/\.\d+Z$/, 'Z'
 export function greeting(hour: number, userName: string): string {
   const word = hour < 5 ? 'Good evening' : hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
   return userName ? `${word}, ${userName}` : word
-}
-
-/** ApprovalPolicy.caption: under the chat box. */
-export const POLICY_CAPTION: Record<ApprovalPolicy, string> = {
-  'Always ask': 'Writes outside your workspace need approval.',
-  'Allow app actions': 'Connected apps act without asking.',
-  'Allow everything': 'Almost everything runs without asking.'
 }
 
 /** Provider.current.models / .model / .modelKey, and the top bar's label ("anthropic/x" → "x"). */
