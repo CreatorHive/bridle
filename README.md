@@ -9,6 +9,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/CreatorHive/bridle/actions/workflows/ci.yml"><img src="https://github.com/CreatorHive/bridle/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-205BFF" alt="MIT license"></a>
   <img src="https://img.shields.io/badge/platform-macOS-1A1B1E" alt="macOS">
   <img src="https://img.shields.io/badge/status-early-8CBFFF" alt="Early">
@@ -122,6 +123,7 @@ Bridle creates `~/Bridle` on first launch and walks you through setup.
 | `npm run typecheck` | `tsc` for main/preload/shared and for the renderer. |
 | `npm test` | vitest. |
 | `npm run build:native` | The Swift helpers: `bridle-helper` and `bridle-notch`. |
+| `npm run dist` | A signed DMG in `dist/` (uses the Developer ID in your keychain; notarizes when Apple credentials are set). |
 | `npm run rebuild` | Rebuilds `node-pty` for Electron (`postinstall` already tries). |
 
 Logs go to `~/Library/Logs/Bridle/bridle.log`.

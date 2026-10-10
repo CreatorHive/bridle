@@ -1,5 +1,6 @@
 # Packaging: `npm run dist` builds a DMG in dist/. Signing uses the Developer ID in your keychain (or CSC_LINK in CI);
-# notarization runs when APPLE_ID + APPLE_APP_SPECIFIC_PASSWORD + APPLE_TEAM_ID (or APPLE_API_KEY…) are set.
+# notarization runs when APPLE_ID + APPLE_APP_SPECIFIC_PASSWORD + APPLE_TEAM_ID are set, or locally with a notarytool
+# keychain profile: APPLE_KEYCHAIN_PROFILE=bridle npm run dist
 appId: com.creatorhive.bridle
 productName: Bridle
 copyright: Copyright © 2026 Sean Scott
