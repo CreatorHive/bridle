@@ -58,6 +58,7 @@
   font-size: var(--fs-15); line-height: calc(1.2em + 3px); white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; cursor: text;
 }
 .files { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.files.mentioned { justify-content: flex-start; margin-top: 10px; }
 .chipButton { --press: 0.98; border-radius: 14px; }
 
 .agent { display: flex; align-items: flex-start; gap: 14px; padding-right: 40px; }

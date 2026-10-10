@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { DEFAULT_SETTINGS, type Account, type Chat, type Mail, type Message } from '../../../shared/types'
 import {
   cardInfo, cleanError, contactsLine, extractActions, greeting, leaves, mergeChat, modelChoice, needsTitle,
-  now, relativePath, sortedJSON, traceTarget, trimDiff, uuid, watcherTurn
+  now, relativePath, mentionedFiles, sortedJSON, traceTarget, trimDiff, uuid, watcherTurn
 } from './logic'
 
 const msg = (role: Message['role'], text: string, extra: Partial<Message> = {}): Message =>
@@ -119,6 +119,8 @@ describe('small helpers', () => {
     expect(relativePath('/Users/s/Bridle/user/files/a.pdf', '/Users/s/Bridle')).toBe('user/files/a.pdf')
     expect(relativePath('/tmp/a.pdf', '/Users/s/Bridle')).toBe('/tmp/a.pdf')
     expect(traceTarget('read notes/x.md')).toBe('notes/x.md')
+    expect(mentionedFiles('It\'s `user/files/A Doc.docx` (41 KB), in `goals/x/` beside `SOURCES.md` and `user/files/A Doc.docx`'))
+      .toEqual(['user/files/A Doc.docx', 'SOURCES.md'])
     expect(traceTarget('searched workspace · 6 results')).toBeNull()
     expect(cleanError(new Error("Error invoking remote method 'agent:run': Error: not implemented: agent.run"))).toBe('not implemented: agent.run')
     expect(uuid()).toMatch(/^[0-9A-F-]{36}$/)

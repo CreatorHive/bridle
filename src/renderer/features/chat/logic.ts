@@ -104,6 +104,12 @@ export function traceTarget(step: string): string | null {
   return /^[^\s·]+(\/[^\s·]*)*\.\w{1,8}$/.test(path) ? path : null
 }
 
+/** Files a reply names in backticks ("`user/files/Plan.docx`"), first four, in order; AgentMessage shows the ones that exist. */
+export function mentionedFiles(text: string): string[] {
+  const paths = [...text.matchAll(/`([^`\n]+\.\w{1,8})`/g)].map((m) => m[1].trim())
+  return [...new Set(paths)].slice(0, 4)
+}
+
 /** JSON with sorted keys (JSONSerialization .sortedKeys), for a permission card's saved input. */
 export function sortedJSON(value: unknown): string {
   return JSON.stringify(value, (_k, v) =>
