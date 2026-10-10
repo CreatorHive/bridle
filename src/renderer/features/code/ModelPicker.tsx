@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Check, ChevronDown, Search } from 'lucide-react'
+import { Check, ChevronDown, Rocket, Search } from 'lucide-react'
 import { DEFAULT_SETTINGS, PROVIDERS } from '../../../shared/types'
 import { Button } from '../../components'
 import { useApp } from '../../app/store'
@@ -90,15 +90,48 @@ export function ModelPicker() {
             ))}
             {!shown.length && <div className={s.note}>No models match</div>}
           </div>
-          <div className={s.effortLabel}>Effort</div>
-          <div className={s.efforts}>
-            {EFFORTS.map(([v, name]) => (
-              <Button key={v} cue="select" className={`${s.effort} ${v === effort ? s.on : ''}`} onClick={() => setPref('codeEffort', v)}>{name}</Button>
-            ))}
-          </div>
+          <EffortSlider effort={effort} />
           <div className={s.pickerFoot}><kbd>⌘⇧/</kbd>Cycle effort</div>
         </div>
       )}
+    </div>
+  )
+}
+
+/** Effort as a six-stop slider. Reaching Max launches a rocket off the thumb, and the track burns while it stays there. */
+function EffortSlider({ effort }: { effort: string }) {
+  const at = Math.max(0, EFFORTS.findIndex(([v]) => v === effort))
+  const last = EFFORTS.length - 1
+  const max = at === last
+  // Bumped each time Max is reached, so the launch replays (and doesn't play when the picker opens on Max).
+  const [launches, setLaunches] = useState(0)
+  const set = (i: number) => {
+    if (i === at) return
+    setPref('codeEffort', EFFORTS[i][0])
+    if (i === last) {
+      setLaunches((n) => n + 1)
+      play('success', { emphasis: 'strong' })
+    } else play('select', { direction: i - at })
+  }
+  return (
+    <div className={`${s.effortBox} ${max ? s.effortMax : ''}`} style={{ ['--at' as string]: at / last }}>
+      <div className={s.effortHead}>
+        <span>Effort</span>
+        <span className={s.effortName}>{max && <Rocket size={12} className={s.effortRocket} />}{EFFORTS[at][1]}</span>
+      </div>
+      <div className={s.effortTrack}>
+        <div className={s.effortRail} />
+        <div className={s.effortStops} aria-hidden>{EFFORTS.map(([v], i) => <span key={v} className={i <= at ? s.passed : ''} />)}</div>
+        <input type="range" min={0} max={last} step={1} value={at} aria-label="Effort" aria-valuetext={EFFORTS[at][1]}
+          onChange={(e) => set(Number(e.target.value))} />
+        {launches > 0 && max && (
+          <span key={launches} className={s.launch} aria-hidden>
+            <Rocket size={16} strokeWidth={2.2} />
+            <i /><i /><i />
+          </span>
+        )}
+      </div>
+      <div className={s.effortEnds}><span>Default</span><span>Max</span></div>
     </div>
   )
 }
