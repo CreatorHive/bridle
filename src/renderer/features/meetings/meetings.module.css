@@ -1,0 +1,33 @@
+/* MeetingsScreen. */
+
+.scroll { height: 100%; overflow-y: auto; }
+.detail { max-width: 720px; margin: 0 auto; padding: 32px 36px; display: flex; flex-direction: column; gap: 22px; }
+.head { display: flex; flex-direction: column; gap: 6px; }
+.when { display: flex; align-items: center; gap: 6px; font-size: var(--fs-13); color: var(--secondary); }
+.when i { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.head h2 { margin: 0; font-size: calc(26px * var(--zoom)); font-weight: 600; user-select: text; }
+.error { display: flex; align-items: center; gap: 4px; font-size: calc(12.5px * var(--zoom)); color: #e8590c; }
+
+.actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.grow { flex: 1; }
+.join, .outline {
+  display: inline-flex; align-items: center; gap: 7px; height: 38px; border-radius: 999px; text-decoration: none; white-space: nowrap;
+}
+.join { padding: 0 18px; background: #1a73e8; color: #fff; font-size: var(--fs-14); font-weight: 600; }
+.outline { padding: 0 14px; color: var(--text); font-size: var(--fs-13); font-weight: 500; box-shadow: inset 0 0 0 1px var(--border); }
+.code { margin-top: -12px; font-size: calc(12.5px * var(--zoom)); color: var(--tertiary); user-select: text; }
+
+.section { padding: 16px; border-radius: 14px; background: rgba(241, 241, 241, 0.5); display: flex; flex-direction: column; gap: 10px; }
+.section h3 { margin: 0; font-size: var(--fs-13); font-weight: 600; color: var(--secondary); }
+.muted { font-size: var(--fs-13); color: var(--secondary); }
+.buttons { display: flex; gap: 8px; }
+.prepare { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 14px; border-radius: 999px; background: #000; color: #fff; font-size: var(--fs-13); font-weight: 500; }
+.prepare:disabled { opacity: 0.5; }
+.small { height: 32px; }
+.person { display: flex; align-items: center; gap: 10px; }
+.person > div { display: flex; flex-direction: column; }
+.person span:first-child { font-size: calc(13.5px * var(--zoom)); }
+.person span + span { font-size: var(--fs-12); color: var(--tertiary); }
+.text { font-size: calc(13.5px * var(--zoom)); line-height: 1.5; white-space: pre-wrap; user-select: text; cursor: text; overflow-wrap: anywhere; }
+.appear { animation: appear var(--state); }
+@keyframes appear { from { opacity: 0; } }

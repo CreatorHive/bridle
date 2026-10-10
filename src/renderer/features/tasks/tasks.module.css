@@ -1,0 +1,139 @@
+/* TasksBoard, TaskCard, tag chips, TaskDetail. Sizes are points × --zoom. */
+
+.board { height: 100%; display: flex; flex-direction: column; min-height: 0; }
+.spacer { flex: 1; }
+
+.toolbar { flex: none; display: flex; align-items: center; gap: 8px; padding: 18px 24px 14px; min-width: 0; }
+.boardTitle { margin: 0; font-size: var(--fs-17); font-weight: 600; }
+.error {
+  display: inline-flex; align-items: center; gap: 5px; min-width: 0; color: var(--orange);
+  font-size: var(--fs-12); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.error svg { flex: none; }
+.syncing { font-size: var(--fs-12); white-space: nowrap; }
+.sync { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; color: var(--tertiary); --press: 0.94; }
+.sync:hover { background: var(--hover); }
+
+.body { flex: 1; min-height: 0; display: flex; align-items: stretch; }
+.columns {
+  flex: 1; min-width: 0; display: flex; align-items: stretch; gap: 14px;
+  overflow-x: auto; padding: 0 24px 24px;
+}
+.columns::-webkit-scrollbar { display: none; }
+
+.column {
+  flex: none; width: 262px; min-height: 0; padding: 12px; border-radius: 16px;
+  display: flex; flex-direction: column; gap: 10px;
+  background: #f7f7f8; transition: background-color var(--state);
+}
+.column.target { background: var(--brand-50); }
+.columnHead { display: flex; align-items: center; gap: 8px; padding: 0 4px; }
+.columnTitle { font-size: calc(13.5px * var(--zoom)); font-weight: 600; }
+.count { font-size: var(--fs-13); color: var(--tertiary); font-variant-numeric: tabular-nums; }
+.plus { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 6px; color: var(--tertiary); --press: 0.9; }
+
+.newTask {
+  flex: none; width: 100%; padding: 12px; border-radius: 12px; border: 0; outline: none;
+  background: #fff; font-size: calc(13.5px * var(--zoom));
+  box-shadow: inset 0 0 0 1px rgba(32, 91, 255, 0.6);
+  animation: fade 150ms ease-in-out both;
+}
+.newTask::placeholder { color: var(--placeholder); }
+
+.cards { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.cards::-webkit-scrollbar { display: none; }
+.empty { padding-top: 8px; font-size: calc(12.5px * var(--zoom)); color: var(--tertiary); }
+.showAll { align-self: center; font-size: calc(12.5px * var(--zoom)); font-weight: 500; color: var(--secondary); }
+.showAll:hover { color: var(--text); }
+
+.card {
+  flex: none; display: flex; flex-direction: column; gap: 9px; padding: 12px; border-radius: 12px;
+  background: #fff; box-shadow: inset 0 0 0 1px rgba(223, 224, 226, 0.6), 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: box-shadow var(--state);
+  /* Cards arriving (a move, a filter, a sync) fade in on MOTION.state. */
+  animation: fade 150ms ease-in-out both;
+}
+.card:hover { box-shadow: inset 0 0 0 1px var(--border), 0 1px 6px rgba(0, 0, 0, 0.06); }
+.card.selected { box-shadow: inset 0 0 0 1.5px var(--brand-400), 0 1px 2px rgba(0, 0, 0, 0.03); }
+.card.selected:hover { box-shadow: inset 0 0 0 1.5px var(--brand-400), 0 1px 6px rgba(0, 0, 0, 0.06); }
+@keyframes fade { from { opacity: 0; } }
+/* The drag preview (.draggable's): the title on a small white card, drawn offscreen for setDragImage. */
+.dragPreview {
+  position: fixed; top: -1000px; left: 0; max-width: 240px; padding: 8px; border-radius: 8px; background: #fff;
+  font-family: var(--font); font-size: var(--fs-13); font-weight: 500; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.card:focus-visible { outline-offset: 2px; }
+.cardHead { display: flex; align-items: flex-start; gap: 8px; }
+.cardHead > svg { margin-top: 2px; }
+.cardTitles { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.cardTitle { font-size: calc(13.5px * var(--zoom)); font-weight: 500; overflow-wrap: anywhere; }
+.state, .updated { font-size: var(--fs-12); color: var(--tertiary); }
+
+.chips { position: relative; display: flex; gap: 6px; overflow: hidden; white-space: nowrap; }
+.chip {
+  flex: none; display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 8px;
+  border-radius: 999px; box-shadow: inset 0 0 0 1px var(--border);
+  font-size: var(--fs-12); color: var(--secondary);
+}
+.chip img { margin-right: -1px; }
+.chip.unfit { position: absolute; visibility: hidden; }
+.dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+
+/* Detail panel */
+.detail {
+  flex: none; width: 420px; margin: 0 16px 16px 0; min-height: 0;
+  display: flex; flex-direction: column; background: #fff; border-radius: 16px;
+  box-shadow: inset 0 0 0 1px var(--border), 0 4px 24px rgba(0, 0, 0, 0.06);
+  /* Slides in from the trailing edge, fading, on MOTION.send, both ways. */
+  animation: slide-in var(--dur-send) var(--ease-send) both;
+}
+.detail.leaving { animation: slide-out var(--dur-send) var(--ease-send) both; pointer-events: none; }
+@keyframes slide-in { from { opacity: 0; transform: translateX(calc(100% + 16px)); } }
+@keyframes slide-out { to { opacity: 0; transform: translateX(calc(100% + 16px)); } }
+.detailHead {
+  flex: none; height: 46px; display: flex; align-items: center; gap: 8px; padding: 0 18px;
+  border-bottom: 1px solid var(--separator);
+  font-size: calc(12.5px * var(--zoom)); font-weight: 500; color: var(--secondary);
+}
+.roundButton { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--wash); color: var(--tertiary); --press: 0.94; }
+.detailScroll { flex: 1; min-height: 0; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 18px; }
+.detailScroll::-webkit-scrollbar { display: none; }
+.detailTitle { margin: 0; font-size: calc(19px * var(--zoom)); font-weight: 600; line-height: 1.3; user-select: text; overflow-wrap: anywhere; }
+.titleField { width: 100%; border: 0; outline: none; padding: 0; resize: none; overflow: hidden; background: none; font-family: inherit; }
+.titleField::placeholder { color: var(--placeholder); }
+
+.properties { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 12px; background: rgba(241, 241, 241, 0.6); }
+.property { display: flex; align-items: baseline; gap: 12px; }
+.property > :first-child { flex: none; width: 72px; font-size: calc(12.5px * var(--zoom)); color: var(--tertiary); }
+.value {
+  font-size: var(--fs-13); color: var(--text); user-select: text;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.statusTrigger { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-13); }
+
+.loadError { display: flex; align-items: center; gap: 6px; font-size: calc(12.5px * var(--zoom)); color: var(--orange); }
+.muted { font-size: var(--fs-13); color: var(--tertiary); }
+.description { font-size: var(--fs-14); }
+.placeholder { display: flex; flex-direction: column; gap: 8px; }
+
+.activity { display: flex; flex-direction: column; gap: 12px; padding-top: 4px; }
+.activityTitle { font-size: var(--fs-13); font-weight: 600; color: var(--secondary); }
+.comment { display: flex; align-items: flex-start; gap: 10px; }
+.comment > div { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.commentHead { display: flex; align-items: baseline; gap: 6px; }
+.commentHead strong { font-size: calc(12.5px * var(--zoom)); font-weight: 600; }
+.commentHead span { font-size: var(--fs-12); color: var(--tertiary); }
+.commentBody { font-size: var(--fs-13); line-height: 1.45; }
+
+.notes { display: flex; flex-direction: column; gap: 6px; }
+.notes textarea {
+  min-height: 180px; padding: 8px; border: 0; outline: none; resize: vertical; border-radius: 10px;
+  background: rgba(241, 241, 241, 0.6); font-size: calc(13.5px * var(--zoom)); line-height: 1.45;
+}
+.savedTo { font-size: calc(11.5px * var(--zoom)); color: var(--tertiary); }
+
+.detailFoot { flex: none; height: 46px; display: flex; align-items: center; padding: 0 18px; border-top: 1px solid var(--separator); }
+.footButton { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-13); font-weight: 500; }
+.runButton { color: var(--brand-400); }
+.delete { color: var(--red); }

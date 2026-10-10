@@ -1,0 +1,15 @@
+.build/
+.swiftpm/
+.env
+node_modules/
+out/
+dist/
+.DS_Store
+*.tsbuildinfo
+
+# Not published: the phone apps, internal planning, and local agent tooling
+mobile/
+PLAN.md
+.claude/
+.agents/
+skills-lock.json

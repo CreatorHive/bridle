@@ -1,0 +1,97 @@
+/* ValueField, ConnectionsPage rows, the Storage page. */
+
+.valueField {
+  flex: none; display: flex; align-items: center; gap: 4px; width: 202px; height: 32px; padding: 0 6px;
+  border-radius: var(--r-control); background: var(--field); font-size: var(--fs-14); color: var(--text);
+}
+.fieldIcon { flex: none; width: 20px; display: grid; place-items: center; color: var(--tertiary); }
+.valueField input { flex: 1; min-width: 0; padding: 0 0 0 4px; border: 0; outline: none; background: none; font-size: var(--fs-14); }
+.valueField input::placeholder { color: var(--placeholder); }
+.fieldValue { flex: 1; min-width: 0; padding-left: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; user-select: text; }
+.mutedField { color: var(--secondary); }
+
+.inline { display: inline-flex; align-items: center; gap: 8px; flex: none; }
+.disabled { opacity: 0.5; pointer-events: none; }
+.compactMenu {
+  display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 8px; border-radius: 7px;
+  background: var(--field); font-size: var(--fs-13); white-space: nowrap;
+}
+.compactMenu svg { color: var(--tertiary); }
+
+.error { display: flex; align-items: center; gap: 6px; padding: 0 12px; font-size: var(--fs-13); color: #f08c00; }
+
+/* Connection rows */
+.connectionRow { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 10px 10px 10px 0; }
+.connectionText { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.connectionText > :first-child { font-size: var(--fs-14); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trailing { flex: none; display: flex; align-items: center; gap: 6px; }
+.hint { font-size: var(--fs-13); color: var(--secondary); }
+.linking { display: inline-flex; align-items: center; gap: 6px; }
+.linking :global(.b-spinner) { width: 10px; height: 10px; }
+
+.badge {
+  position: relative; flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--wash); color: var(--secondary); font-size: var(--fs-14); font-weight: 600;
+}
+.photo { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+.corner { position: absolute; right: -3px; bottom: -3px; box-sizing: content-box; padding: 2px; border-radius: 50%; background: #fff; }
+.logoBadge { background: #fff; box-shadow: inset 0 0 0 1px var(--border); }
+.badgeSpinner { flex: none; width: 32px; height: 32px; display: grid; place-items: center; }
+
+.chips { display: flex; align-items: center; gap: 4px; overflow: hidden; white-space: nowrap; }
+.toolkit {
+  flex: none; display: inline-flex; align-items: center; gap: 3px; height: 18px; padding: 0 6px; border-radius: 999px;
+  font-size: var(--fs-11); font-weight: 500; transition: opacity var(--state), filter var(--state);
+}
+.toolkit.dim { filter: grayscale(1); opacity: 0.5; }
+.ellipsis { width: 30px; height: 30px; display: grid; place-items: center; color: var(--tertiary); }
+
+/* Storage */
+.storageHead { display: flex; flex-direction: column; gap: 8px; padding-top: 4px; }
+.storageLine { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: var(--fs-13); color: var(--secondary); }
+.wsPath { font-family: var(--mono); font-size: var(--fs-13); color: var(--tertiary); }
+.wsPath:hover { color: var(--secondary); }
+.shareBar { display: flex; gap: 2px; height: 8px; }
+.shareBar span { min-width: 4px; flex-basis: 0; border-radius: 999px; }
+.storageSearch {
+  display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border-radius: var(--r-control);
+  background: var(--field); color: var(--tertiary);
+}
+.storageSearch input { flex: 1; border: 0; outline: none; background: none; color: var(--text); font-size: var(--fs-14); }
+.storageSearch input::placeholder { color: var(--placeholder); }
+.storageRow { width: 100%; display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 10px 12px 10px 0; text-align: left; --press: 0.99; }
+.storageText { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.storageText > :first-child { font-size: var(--fs-14); }
+.storageText > :last-child { font-family: var(--mono); font-size: var(--fs-12); color: var(--tertiary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.storageSize { font-size: var(--fs-13); color: var(--secondary); white-space: nowrap; }
+
+/* Memory import (MemoryImportCard) */
+.segmented { display: inline-flex; padding: 2px; border-radius: 8px; background: var(--field); }
+.segment { height: 26px; padding: 0 10px; border-radius: 6px; font-size: var(--fs-13); color: var(--secondary); --press: 0.97; }
+.segment.on { background: #fff; color: var(--text); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); }
+.importBox { display: flex; flex-direction: column; gap: 10px; padding: 12px 10px 12px 0; }
+.importBox > span { font-size: var(--fs-14); }
+.importBox textarea {
+  height: 150px; padding: 8px; border: 0; outline: none; resize: none; border-radius: var(--r-control); background: #fff;
+  font-family: var(--mono); font-size: calc(12.5px * var(--zoom)); box-shadow: inset 0 0 0 1px var(--separator);
+}
+.importBox textarea::placeholder { color: var(--placeholder); }
+.importFoot { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.phoneToken { display: flex; align-items: center; gap: 8px; }
+
+/* Automations */
+.automationActions { display: flex; align-items: center; gap: 8px; flex: none; }
+.script { padding: 0 16px 14px; display: flex; flex-direction: column; gap: 6px; font-size: var(--fs-12); color: var(--tertiary); }
+.script pre {
+  margin: 0; max-height: 220px; overflow: auto; padding: 10px 12px; border-radius: 8px; background: var(--wash);
+  font: 12px/1.5 var(--mono); color: var(--text); white-space: pre-wrap;
+}
+
+/* MCP servers */
+.mcpForm { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; }
+.mcpJson {
+  width: 100%; box-sizing: border-box; resize: vertical; padding: 10px 12px; border: 0; border-radius: 8px; outline: none;
+  background: var(--field); font: 12px/1.5 var(--mono); color: var(--text);
+}
+.mcpError { font-size: var(--fs-12); color: var(--red); }
+.mcpForm .automationActions { justify-content: flex-end; }

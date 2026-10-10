@@ -1,0 +1,216 @@
+/* Shared primitives. Class names are prefixed b- so feature CSS modules never collide. */
+
+/* Button / Pill */
+.b-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 30px; padding: 0 12px; border-radius: 999px;
+  font-size: var(--fs-13); font-weight: 500; white-space: nowrap;
+  background: #fff; color: var(--text); box-shadow: inset 0 0 0 1px var(--border);
+}
+.b-pill:hover { background: var(--wash); }
+.b-pill.filled { background: #000; color: #fff; box-shadow: none; }
+.b-pill.filled:hover { background: #222; }
+.b-pill:disabled { opacity: 0.5; pointer-events: none; }
+
+.b-icon-button {
+  display: inline-grid; place-items: center; border-radius: 999px;
+  width: var(--size, 30px); height: var(--size, 30px);
+  color: var(--text); background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --press: 0.94;
+}
+.b-icon-button:hover { background: #fff; }
+
+/* Row */
+.b-row {
+  display: flex; align-items: center; gap: 11px; width: 100%;
+  height: 34px; padding: 0 10px; border-radius: var(--r-row);
+  font-size: var(--fs-14); text-align: left; color: var(--text);
+  --press: 0.98;
+}
+.b-row:hover { background: var(--hover); }
+.b-row.selected { background: var(--selected); }
+.b-row.muted { color: var(--tertiary); }
+.b-row.indent { height: 30px; padding-left: 41px; }
+.b-row .icon { width: 20px; flex: none; display: grid; place-items: center; }
+.b-row .icon img { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; }
+.b-row .title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.b-row .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand-400); flex: none; }
+.b-row .badge { font-size: var(--fs-12); font-weight: 500; color: var(--secondary); font-variant-numeric: tabular-nums; }
+.b-spinner {
+  width: 12px; height: 12px; border-radius: 50%; flex: none;
+  border: 1.5px solid var(--border); border-top-color: var(--secondary);
+  animation: b-spin 0.8s linear infinite;
+}
+@keyframes b-spin { to { transform: rotate(360deg); } }
+
+/* Section header in the sidebar */
+.b-section-header {
+  padding: 8px 10px 6px; font-size: var(--fs-13); font-weight: 500; color: var(--tertiary);
+}
+.b-section-header.divider { border-top: 1px solid var(--border); margin: 12px 6px 0; padding: 12px 4px 6px; }
+
+/* Card */
+.b-card { background: #fff; border-radius: var(--r-panel); box-shadow: inset 0 0 0 1px var(--separator); padding: 12px; }
+
+/* Settings rows (SettingsCard / SectionLabel / SettingsRow / Field) */
+.b-settings-card { background: var(--card); border-radius: var(--r-card); padding-left: 12px; }
+.b-settings-card > * + * { border-top: 1px solid var(--separator); }
+.b-section-label { padding: 0 12px; margin-bottom: -12px; font-size: var(--fs-13); font-weight: 500; color: var(--secondary); }
+.b-settings-row { display: flex; align-items: center; gap: 16px; min-height: 52px; padding: 10px 10px 10px 0; }
+.b-settings-row .label { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.b-settings-row .label > :first-child { font-size: var(--fs-14); color: var(--text); }
+.b-settings-row .label > :nth-child(2) { font-size: var(--fs-13); color: var(--secondary); }
+.b-field {
+  width: 202px; height: 32px; padding: 0 10px; border: 0; border-radius: var(--r-control);
+  background: var(--field); font-size: var(--fs-14); outline: none;
+}
+.b-field::placeholder { color: var(--placeholder); }
+
+/* Toggle (small macOS switch) */
+.b-toggle {
+  position: relative; width: 32px; height: 19px; border-radius: 999px; flex: none;
+  background: rgba(0, 0, 0, 0.12); transition: background-color var(--state);
+}
+.b-toggle::after {
+  content: ''; position: absolute; top: 2px; left: 2px; width: 15px; height: 15px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25); transition: transform 200ms var(--ease-modal);
+}
+.b-toggle[aria-checked='true'] { background: var(--brand-400); }
+.b-toggle[aria-checked='true']::after { transform: translateX(13px); }
+
+/* Menu / ChoiceMenu */
+.b-menu { position: relative; display: inline-block; }
+.b-menu-button { display: block; }
+.b-menu-trigger {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  width: 202px; height: 32px; padding: 0 10px; border-radius: var(--r-control);
+  background: var(--field); font-size: var(--fs-14); text-align: left;
+}
+.b-menu-trigger svg { color: var(--tertiary); flex: none; }
+.b-menu-list {
+  position: absolute; z-index: 50; top: calc(100% + 4px); right: 0; min-width: 100%;
+  max-height: 320px; overflow: auto; padding: 4px; margin: 0; list-style: none;
+  background: #fff; border-radius: var(--r-control);
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.12), 0 8px 24px rgba(0, 0, 0, 0.12);
+  animation: b-pop 150ms var(--ease-modal);
+}
+.b-menu-item {
+  display: flex; align-items: center; gap: 8px; width: 100%; padding: 6px 8px; border-radius: 6px;
+  font-size: var(--fs-13); white-space: nowrap; text-align: left;
+}
+.b-menu-item:hover, .b-menu-item:focus-visible { background: var(--hover); outline: none; }
+.b-menu-item .check { width: 14px; flex: none; }
+.b-menu-item.destructive { color: var(--red); }
+@keyframes b-pop { from { opacity: 0; transform: scale(0.96) translateY(-2px); } }
+.b-menu-list.leaving { animation: b-fade-out 120ms ease-out both; pointer-events: none; }
+@keyframes b-fade-out { to { opacity: 0; } }
+.b-menu-list.sub { top: -4px; right: auto; left: calc(100% - 2px); min-width: 160px; }
+.b-menu-list li { position: relative; }
+.b-menu-list:has(.sub) { overflow: visible; max-height: none; }
+.b-menu-list li.separated { margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--separator); }
+.b-menu-item .label { flex: 1; }
+.b-menu-item .chevron { color: var(--tertiary); margin-left: 8px; }
+.b-menu-item:disabled { color: var(--placeholder); pointer-events: none; }
+
+/* Avatar: glossy sphere, a white hairline, a soft drop. */
+.b-avatar {
+  position: relative; display: inline-grid; place-items: center; flex: none; border-radius: 50%;
+  color: #fff; font-weight: 600; line-height: 1; text-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.32), 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.b-avatar.photo { box-shadow: none; }
+.b-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.b-avatar.photo::after { content: ''; position: absolute; inset: 0; border-radius: 50%; box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.08); }
+
+/* Shimmer: a skeleton block with a soft white highlight sweeping left to right (half as wide as the block, linear 1.3 s, forever; still under Reduce Motion). */
+.b-shimmer {
+  border-radius: 6px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0)) -150% 0 / 50% 100% no-repeat,
+    var(--wash);
+  animation: b-skeleton 1.3s linear infinite;
+}
+@keyframes b-skeleton { to { background-position: 210% 0, 0 0; } }
+
+/* ShimmerText: a band of brand blue, min(48px, 35%) wide, sweeping across
+   tertiary text in 2 s (timingCurve 0.76, 0, 0.24, 1), then resting 0.3 s. */
+.b-shimmer-text {
+  background:
+    linear-gradient(90deg, rgba(32, 91, 255, 0), var(--brand-400), var(--brand-300), var(--brand-200), rgba(140, 191, 255, 0))
+      -48px 0 / min(48px, 35%) 100% no-repeat,
+    linear-gradient(var(--tertiary), var(--tertiary));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: b-band 2.3s infinite;
+}
+@keyframes b-band {
+  0% { background-position: -48px 0, 0 0; animation-timing-function: var(--ease-sweep); }
+  86.96%, 100% { background-position: calc(100% + 48px) 0, 0 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .b-shimmer-text { background: none; color: var(--tertiary); }
+  .b-shimmer { background: var(--wash); }
+}
+
+/* Markdown (15pt on +4pt line spacing, blocks 10pt apart, list items 7pt,
+   "•" bullets 10pt from the text, the list inset 8pt) */
+.b-markdown { font-size: var(--fs-15); line-height: calc(1.2em + 4px); color: var(--text); user-select: text; cursor: text; }
+.b-markdown > * { margin: 0; }
+.b-markdown > * + * { margin-top: 10px; }
+.b-markdown p, .b-markdown blockquote { white-space: pre-wrap; overflow-wrap: anywhere; }
+.b-markdown h1 { font-size: 1.4em; font-weight: 600; }
+.b-markdown h2 { font-size: 1.2em; font-weight: 600; }
+.b-markdown h3, .b-markdown h4, .b-markdown h5, .b-markdown h6 { font-size: 1em; font-weight: 600; }
+.b-markdown ul, .b-markdown ol { padding-left: 8px; }
+.b-markdown ul { list-style: none; }
+.b-markdown ul > li { position: relative; padding-left: calc(0.45em + 10px); }
+.b-markdown ul > li::before { content: '•'; position: absolute; left: 0; }
+.b-markdown ol { padding-left: calc(8px + 1.4em); }
+.b-markdown li + li { margin-top: 7px; }
+.b-markdown a { color: var(--brand-400); text-decoration: none; cursor: pointer; }
+.b-markdown a:hover { text-decoration: underline; }
+.b-markdown code { font-family: var(--mono); font-size: 0.88em; background: var(--wash); border-radius: 4px; padding: 1px 4px; }
+.b-markdown pre { background: var(--wash); border-radius: var(--r-control); padding: 10px 12px; overflow: auto; }
+.b-markdown pre code { background: none; padding: 0; }
+.b-markdown blockquote { border-left: 3px solid var(--border); padding-left: 10px; color: var(--secondary); }
+.b-markdown hr { border: 0; border-top: 1px solid var(--border); }
+/* A streamed character mid-fade (StreamingMarkdown); its animation is set from JS on the document timeline. */
+.b-char { opacity: 0; }
+
+/* Placeholder (stub screens) */
+.b-placeholder {
+  height: 100%; display: grid; place-content: center; justify-items: center; gap: 6px;
+  color: var(--tertiary); font-size: var(--fs-14); text-align: center; padding: 24px;
+}
+.b-placeholder strong { color: var(--text); font-size: var(--fs-17); font-weight: 600; }
+
+/* Motion toolkit (components/Motion.tsx, motion.ts). Entry transitions as one-shot animations. */
+
+/* replyEntry: the agent's reply, from a 2 px drop at 58% opacity (MOTION.reply). */
+.b-reply-entry { animation: b-reply var(--dur-reply) var(--ease-reply) both; }
+@keyframes b-reply { from { opacity: 0.58; transform: translateY(2px); } }
+
+/* sendEntry: your message, up from the bottom edge by its own height, fading in (MOTION.send). */
+.b-send-entry { animation: b-send var(--dur-send) var(--ease-send) both; }
+@keyframes b-send { from { opacity: 0; transform: translateY(100%); } }
+
+/* Fade + scale (.scale(0.9).combined(with: .opacity)): chips, avatars joining a stack. */
+.b-pop-entry { animation: b-pop-in var(--dur-lines) var(--ease-lines) both; }
+@keyframes b-pop-in { from { opacity: 0; transform: scale(0.9); } }
+
+/* .transition(.opacity) */
+.b-fade-entry { animation: b-fade-in var(--dur-modal) var(--ease-modal) both; }
+@keyframes b-fade-in { from { opacity: 0; } }
+
+/* Swap: old and new view share one grid cell while they trade places. */
+.b-swap { display: inline-grid; vertical-align: middle; }
+.b-swap > * { grid-area: 1 / 1; display: inline-flex; align-items: center; justify-content: center; min-width: 0; }
+.b-swap-icon > .b-swap-in { animation: b-swap-icon-in var(--icon-swap) both; }
+.b-swap-icon > .b-swap-out { animation: b-swap-icon-out var(--icon-swap) both; }
+@keyframes b-swap-icon-in { from { opacity: 0; transform: scale(0.6); } }
+@keyframes b-swap-icon-out { to { opacity: 0; transform: scale(0.6); } }
+.b-swap-rise { justify-items: start; }
+.b-swap-rise > .b-swap-in { animation: b-rise-in 150ms var(--ease-modal) both; }
+.b-swap-rise > .b-swap-out { animation: b-rise-out 100ms var(--ease-modal) both; }
+@keyframes b-rise-in { from { opacity: 0; transform: translateY(8px); } }
+@keyframes b-rise-out { to { opacity: 0; transform: translateY(-8px); } }

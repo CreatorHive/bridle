@@ -1,0 +1,194 @@
+/* Onboarding, its demos and the ConnectCard. Sizes are points × --zoom. */
+
+.onboarding {
+  position: fixed; inset: 0; overflow: hidden; color: var(--text);
+  transition: opacity 600ms ease-in-out; animation: appear 600ms ease-in-out;
+}
+/* Its own transparent window (src/main/onboarding.ts): the desktop shows through the light field. */
+:global(body):has(.onboarding) { background: transparent; }
+/* Window show / hide: alpha 0 → 1 → 0 over 0.6 s. */
+.closing { opacity: 0; pointer-events: none; }
+.spacer { flex: 1; }
+
+/* Light field */
+.field { position: absolute; inset: 0; transition: opacity 800ms cubic-bezier(0.37, 0, 0.63, 1); pointer-events: none; }
+.veil { position: absolute; inset: 0; }
+.horizon { position: absolute; left: -35%; width: 170%; top: 54%; height: 100%; animation: breathe 12s linear infinite alternate; }
+.bloom { position: absolute; width: 80%; height: 84%; top: 58%; }
+.bloomLeft { left: -36%; animation: drift 21s linear infinite alternate; }
+.bloomRight { left: 56%; animation: drift 27s linear infinite alternate-reverse; }
+@keyframes breathe { to { transform: scale(1.03, 1.06); } }
+@keyframes drift { from { transform: translate(-2%, 1%); } to { transform: translate(3%, -1.5%); } }
+
+/* Mark */
+.markHolder { position: absolute; left: 50%; width: 80px; height: 80px; transform-origin: 50% 50%; pointer-events: none; }
+.mark { display: block; flex: none; transition: transform 200ms ease-out; } /* sized by its width/height */
+.thinking { animation: think 0.9s ease-in-out infinite alternate; }
+@keyframes think { to { transform: scale(1.06); } }
+
+/* Intro */
+.intro { position: absolute; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; }
+.intro h1 {
+  margin: 24px 0 0; height: 60px; line-height: 60px; color: #fff;
+  font-size: calc(48px * var(--zoom)); font-weight: 600; letter-spacing: -0.96px; white-space: nowrap;
+}
+.start {
+  margin-top: 32px; height: 44px; padding: 0 24px; border-radius: 999px; background: #fff; color: var(--brand-700);
+  font-size: calc(16px * var(--zoom)); font-weight: 600;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.2), 0 8px 12px rgba(0, 0, 0, 0.4);
+}
+.start:disabled { cursor: default; }
+.part { opacity: 0; transform: translateY(8px); transition: opacity 450ms cubic-bezier(0.33, 1, 0.68, 1), transform 450ms cubic-bezier(0.33, 1, 0.68, 1); }
+.part.shown { opacity: 1; transform: none; }
+.part.leaving { opacity: 0; transform: translateY(-4px); transition-duration: 150ms; transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
+
+/* Corner */
+.corner { position: absolute; top: 24px; right: 24px; display: flex; gap: 8px; }
+.cornerButton {
+  width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
+  background: rgba(255, 255, 255, 0.14); color: rgba(255, 255, 255, 0.9);
+}
+
+/* Thread */
+.thread { position: absolute; inset: 76px 0 0; display: flex; flex-direction: column; align-items: center; animation: appear 500ms cubic-bezier(0.4, 0, 0.2, 1); }
+@keyframes appear { from { opacity: 0; } }
+/* While the feature burst plays (Showcase.tsx), the conversation steps back for its caption. */
+.thread { transition: opacity 500ms cubic-bezier(0.4, 0, 0.2, 1), filter 500ms cubic-bezier(0.4, 0, 0.2, 1), transform 500ms cubic-bezier(0.4, 0, 0.2, 1); }
+.receded { opacity: 0.1; filter: blur(4px); transform: scale(0.98); }
+.scroll { flex: 1; min-height: 0; width: 100%; overflow-y: auto; display: flex; justify-content: center; }
+.scroll::-webkit-scrollbar { display: none; }
+.column { width: 440px; padding: 8px 0; display: flex; flex-direction: column; gap: 6px; height: max-content; }
+
+.line { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; animation: enter var(--d35) var(--e35) both; }
+.line.mine { align-items: flex-end; }
+.line.newGroup { padding-top: 14px; }
+.sender { padding-left: 24px; font-size: var(--fs-11); font-weight: 500; color: rgba(255, 255, 255, 0.7); }
+.bubbleRow { display: flex; align-items: flex-end; gap: 8px; max-width: 100%; }
+.bubbleRow > span { flex: none; }
+.bubble {
+  max-width: 340px; padding: 8px 12px; border-radius: 16px; background: rgba(255, 255, 255, 0.92);
+  font-size: calc(13.5px * var(--zoom)); line-height: normal; color: #000; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06); user-select: text;
+}
+.mine .bubble { background: var(--brand-300); color: #fff; box-shadow: none; margin-left: 60px; }
+.demoWrap { align-self: stretch; padding: 2px 0 0 24px; }
+
+.typing { display: flex; align-items: flex-end; gap: 8px; animation: appear 200ms ease-out; }
+.dots {
+  width: 44px; height: 32px; border-radius: 16px; background: rgba(255, 255, 255, 0.92);
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+}
+.dots i { width: 3.5px; height: 3.5px; border-radius: 50%; background: #000; animation: dot 1.2s ease-in-out infinite; }
+.dots i:nth-child(2) { animation-delay: 0.2s; }
+.dots i:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dot { 0%, 60%, 100% { opacity: 0.3; } 30% { opacity: 1; } }
+
+/* .move(edge: .bottom).combined(with: .opacity): up by the view's own height. */
+@keyframes enter { from { opacity: 0; transform: translateY(100%); } }
+@keyframes leave { to { opacity: 0; transform: translateY(100%); } }
+/* Prompts: in with .spring(duration: 0.3), out with the reply's .spring(duration: 0.35). */
+.rise { animation: enter var(--d30) var(--e30) both; }
+.promptLeaving > .rise { animation: leave var(--d35) var(--e35) both; pointer-events: none; }
+/* Demo steps: .spring(duration: 0.45). */
+.stepIn { animation: enter var(--d45) var(--e45) both; }
+.stepFade { animation: appear var(--d45) var(--e45) both; }
+.slide { animation: slide var(--d45) var(--e45) both; }
+@keyframes slide { from { opacity: 0; transform: translateX(-6px); } }
+.grow { animation: grow var(--d45) var(--e45) both; transform-origin: top; }
+@keyframes grow { from { opacity: 0; transform: scale(0.6); } }
+
+/* Prompts */
+.inputArea { flex: none; width: 440px; margin: 10px 0 44px; transition: height var(--d30) var(--e30); }
+.textPrompt {
+  display: flex; align-items: center; gap: 10px; height: 46px; padding: 0 8px 0 18px; border-radius: 999px;
+  background: #fff; box-shadow: 0 4px 14px rgba(59, 124, 255, 0.18);
+}
+.textPrompt input { flex: 1; min-width: 0; border: 0; outline: none; background: none; font-size: var(--fs-15); }
+.textPrompt input::placeholder { color: var(--placeholder); }
+.send { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--brand-300); color: #fff; flex: none; }
+.sendEmpty { background: rgba(59, 124, 255, 0.35); }
+.choices { display: flex; justify-content: flex-end; gap: 8px; }
+.choice {
+  display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 999px;
+  background: #fff; color: var(--brand-300); font-size: calc(13.5px * var(--zoom)); font-weight: 500;
+}
+.choice.primary { background: var(--brand-300); color: #fff; }
+
+/* ConnectCard */
+.connect { display: flex; flex-direction: column; gap: 10px; }
+.connectRows { border-radius: 18px; background: rgba(255, 255, 255, 0.94); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06); }
+.connectRow { display: flex; align-items: center; gap: 12px; height: 60px; padding: 0 14px; }
+.connectRow + .connectRow { position: relative; }
+.connectRow + .connectRow::before { content: ''; position: absolute; top: 0; left: 56px; right: 0; height: 1px; background: rgba(223, 224, 226, 0.6); }
+.connectRow > img { flex: none; margin: 0 2px; }
+.connectText { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.connectText strong { font-size: var(--fs-14); font-weight: 500; }
+.connectText span { font-size: calc(12.5px * var(--zoom)); color: var(--secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cancel { font-size: calc(12.5px * var(--zoom)); font-weight: 500; color: var(--secondary); }
+.connectButton { height: 30px; padding: 0 14px; border-radius: 999px; background: var(--brand-300); color: #fff; font-size: var(--fs-13); font-weight: 500; }
+.connectButton:disabled { opacity: 0.5; }
+.connectFoot { display: flex; align-items: center; gap: 8px; }
+.connectError {
+  min-width: 0; color: #fff; font-size: var(--fs-12);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* Demo cards (k = 1.25 over the 340pt design) */
+.demo {
+  --k: 1.25; display: flex; flex-direction: column; gap: calc(12px * var(--k)); padding: calc(14px * var(--k));
+  border-radius: calc(18px * var(--k)); background: rgba(255, 255, 255, 0.96); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.dSource { display: flex; align-items: center; gap: calc(7px * var(--k)); font-size: calc(12px * var(--k) * var(--zoom)); font-weight: 500; color: var(--secondary); }
+.dIcon { width: calc(14px * var(--k)); height: calc(14px * var(--k)); flex: none; object-fit: contain; }
+.dWhen { font-size: calc(11.5px * var(--k) * var(--zoom)); font-weight: 400; color: var(--tertiary); }
+.dText { margin: 0; font-size: calc(13px * var(--k) * var(--zoom)); line-height: 1.35; }
+.dPanel {
+  display: flex; flex-direction: column; gap: calc(7px * var(--k)); padding: calc(12px * var(--k));
+  border-radius: calc(12px * var(--k)); background: rgba(241, 241, 241, 0.7);
+}
+.dPanelTitle { display: flex; align-items: center; gap: 6px; font-size: calc(12.5px * var(--k) * var(--zoom)); font-weight: 600; }
+.dField { display: flex; gap: calc(8px * var(--k)); font-size: calc(12.5px * var(--k) * var(--zoom)); }
+.dField span { width: calc(50px * var(--k)); flex: none; font-size: calc(11.5px * var(--k) * var(--zoom)); color: var(--tertiary); }
+.dBody {
+  margin: 0; font-size: calc(12px * var(--k) * var(--zoom)); color: var(--secondary);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.dPills { display: flex; align-items: center; gap: calc(7px * var(--k)); padding-top: 2px; }
+.dNote { font-size: calc(11px * var(--k) * var(--zoom)); color: var(--tertiary); }
+.dPill {
+  flex: none; display: inline-flex; align-items: center; height: calc(28px * var(--k)); padding: 0 calc(13px * var(--k));
+  border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px var(--border);
+  font-size: calc(12.5px * var(--k) * var(--zoom)); font-weight: 500;
+  outline: 3px solid rgba(59, 124, 255, 0); outline-offset: 1.5px;
+  transition: outline-color var(--d45) var(--e45), background-color var(--d45) var(--e45), color var(--d45) var(--e45);
+}
+.dSmall { height: calc(24px * var(--k)); padding: 0 calc(10px * var(--k)); font-size: calc(11.5px * var(--k) * var(--zoom)); }
+.dFilled { background: #000; color: #fff; box-shadow: none; }
+.dGlow { outline-color: rgba(59, 124, 255, 0.55); }
+
+.week { display: flex; align-items: flex-start; gap: calc(5px * var(--k)); height: calc(72px * var(--k)); }
+.day { flex: 1; display: flex; flex-direction: column; gap: calc(4px * var(--k)); align-items: stretch; text-align: center; }
+.day > span:first-child { font-size: calc(11px * var(--k) * var(--zoom)); font-weight: 500; color: var(--tertiary); }
+.block {
+  position: relative; display: block; border-radius: 4px; outline: 1px dashed transparent; outline-offset: -1px;
+  transition: background-color var(--d45) var(--e45), outline-color var(--d45) var(--e45);
+}
+/* The 2.5pt bar is an overlay, so it keeps square corners over the rounded block. */
+.block::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2.5px; background: var(--c); }
+.dInvite { flex-direction: row; align-items: center; gap: calc(8px * var(--k)); }
+.dInviteText { display: flex; flex-direction: column; gap: 2px; white-space: nowrap; }
+.dInviteText strong { font-size: calc(13px * var(--k) * var(--zoom)); font-weight: 600; }
+.dInviteText span { font-size: calc(11.5px * var(--k) * var(--zoom)); color: var(--tertiary); }
+
+.branch {
+  height: calc(19px * var(--k)); padding: 0 calc(6px * var(--k)); border-radius: 999px; background: var(--wash);
+  display: inline-flex; align-items: center; font-family: var(--mono); font-size: calc(11px * var(--k) * var(--zoom)); font-weight: 400;
+}
+.terminal {
+  display: flex; flex-direction: column; gap: calc(4px * var(--k)); min-height: calc(112px * var(--k)); padding: calc(12px * var(--k));
+  border-radius: calc(12px * var(--k)); background: #16171a;
+  font-family: var(--mono); font-size: calc(11.5px * var(--k) * var(--zoom)); white-space: pre; overflow: hidden;
+}
+.cursor { display: block; width: calc(7px * var(--k)); height: calc(13px * var(--k)); background: rgba(255, 255, 255, 0.7); }
+.change { display: flex; align-items: center; gap: calc(8px * var(--k)); }
+.mono { font-family: var(--mono); font-size: calc(12px * var(--k) * var(--zoom)); font-weight: 500; white-space: nowrap; }
+.diff { font-family: var(--mono); font-size: calc(11px * var(--k) * var(--zoom)); font-weight: 600; white-space: nowrap; }

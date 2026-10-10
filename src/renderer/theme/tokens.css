@@ -1,0 +1,125 @@
+/* Bridle's look: colors, brand, type, radii and motion (MOTION, tactile press). Light mode only.
+   Geist and Geist Mono: Vercel, SIL OFL (fonts/OFL.txt). */
+
+@font-face { font-family: Geist; src: url('./fonts/Geist-Regular.ttf') format('truetype'); font-weight: 400; }
+@font-face { font-family: Geist; src: url('./fonts/Geist-Medium.ttf') format('truetype'); font-weight: 500; }
+@font-face { font-family: Geist; src: url('./fonts/Geist-SemiBold.ttf') format('truetype'); font-weight: 600; }
+@font-face { font-family: Geist; src: url('./fonts/Geist-Bold.ttf') format('truetype'); font-weight: 700; }
+@font-face { font-family: 'Geist Mono'; src: url('./fonts/GeistMono-Regular.ttf') format('truetype'); font-weight: 400; }
+@font-face { font-family: 'Geist Mono'; src: url('./fonts/GeistMono-Medium.ttf') format('truetype'); font-weight: 500; }
+@font-face { font-family: 'Geist Mono'; src: url('./fonts/GeistMono-SemiBold.ttf') format('truetype'); font-weight: 600 700; }
+
+:root {
+  color-scheme: light;
+
+  /* Theme */
+  --text: #1a1b1e;
+  --secondary: #4a4c50;
+  --tertiary: #7f8286;
+  --placeholder: #b6b8bb;
+  --border: #dfe0e2;
+  --wash: #f1f1f1;
+  --hover: rgba(0, 0, 0, 0.045);
+  --selected: rgba(0, 0, 0, 0.07);
+  --chrome: #ededee;
+  --sidebar: linear-gradient(to bottom, #f6f6f7, #fafafa);
+  --content: #ffffff;
+
+  /* Settings palette */
+  --panel-rail: #fafafa;
+  --card: #f7f7f7;
+  --field: #ededee;
+  --separator: rgba(0, 0, 0, 0.07);
+
+  /* Brand blues */
+  --brand-25: #e1f9ff;
+  --brand-50: #b8ddff;
+  --brand-100: #8cbfff;
+  --brand-200: #619eff;
+  --brand-300: #3b7cff;
+  --brand-400: #205bff;
+  --brand-700: #062389;
+  --brand-800: #041756;
+
+  /* macOS system colors (green / red / orange): done, destructive, warnings */
+  --green: #34c759;
+  --red: #ff3b30;
+  --orange: #ff9500;
+  --amber: #e8a200;
+
+  /* Radii */
+  --r-row: 9px;
+  --r-control: 10px;
+  --r-panel: 12px;
+  --r-card: 16px;
+  --r-modal: 24px;
+
+  /* Motion (MOTION; components/motion.ts holds the same values for JS).
+     Springs are spring(response, damping) sampled into linear(); motion.test.ts checks them. */
+  --state: 150ms ease-in-out;
+  --icon-swap: 250ms ease-in-out;
+  --ease-reply: cubic-bezier(0.23, 1, 0.32, 1);
+  --dur-reply: 160ms;
+  --ease-modal: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-modal: 300ms;
+  --ease-recoil: cubic-bezier(0.25, 0.3, 0.25, 1.32);
+  --ease-sweep: cubic-bezier(0.76, 0, 0.24, 1);
+  /* send: spring(0.44, 0.99) */
+  --dur-send: 626ms;
+  --ease-send: linear(0, 0.022, 0.075, 0.146, 0.226, 0.309, 0.39, 0.466, 0.537, 0.601, 0.658, 0.708, 0.752, 0.791, 0.824, 0.852, 0.876, 0.897, 0.914, 0.929, 0.941, 0.951, 0.96, 0.967, 0.973, 0.977, 0.982, 0.985, 0.988, 0.99, 0.992, 0.993, 0.995, 0.996, 0.996, 0.997, 0.998, 0.998, 0.998, 0.999, 1);
+  /* composerLines: spring(0.3, 0.9) */
+  --dur-lines: 399ms;
+  --ease-lines: linear(0, 0.019, 0.068, 0.135, 0.213, 0.295, 0.376, 0.455, 0.529, 0.597, 0.658, 0.712, 0.76, 0.801, 0.837, 0.867, 0.893, 0.915, 0.932, 0.947, 0.959, 0.969, 0.977, 0.983, 0.988, 0.992, 0.995, 0.997, 0.998, 1, 1, 1.001, 1.001, 1.001, 1.002, 1.002, 1.001, 1.001, 1.001, 1.001, 1);
+  /* settle: spring(0.5, 0.86), the new-chat composer gliding down */
+  --dur-settle: 697ms;
+  --ease-settle: linear(0, 0.021, 0.075, 0.148, 0.232, 0.321, 0.409, 0.492, 0.57, 0.64, 0.703, 0.758, 0.805, 0.845, 0.879, 0.907, 0.93, 0.948, 0.963, 0.975, 0.984, 0.99, 0.995, 0.999, 1.002, 1.003, 1.004, 1.005, 1.005, 1.005, 1.005, 1.004, 1.004, 1.003, 1.003, 1.003, 1.002, 1.002, 1.002, 1.001, 1);
+  /* fold: spring(0.45, 0.9), an allowed card folding away */
+  --dur-fold: 599ms;
+  --ease-fold: linear(0, 0.019, 0.068, 0.135, 0.213, 0.295, 0.377, 0.455, 0.529, 0.597, 0.658, 0.712, 0.76, 0.802, 0.837, 0.868, 0.893, 0.915, 0.933, 0.947, 0.959, 0.969, 0.977, 0.983, 0.988, 0.992, 0.995, 0.997, 0.998, 1, 1, 1.001, 1.001, 1.001, 1.002, 1.002, 1.001, 1.001, 1.001, 1.001, 1);
+
+  /* Type: point sizes × --zoom (1.1) */
+  --zoom: 1.1;
+  --fs-11: calc(11px * var(--zoom));
+  --fs-12: calc(12px * var(--zoom));
+  --fs-13: calc(13px * var(--zoom));
+  --fs-14: calc(14px * var(--zoom));
+  --fs-15: calc(15px * var(--zoom));
+  --fs-17: calc(17px * var(--zoom));
+  --fs-20: calc(20px * var(--zoom));
+  --font: Geist, -apple-system, system-ui, sans-serif;
+  --mono: 'Geist Mono', ui-monospace, Menlo, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body, #root {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font);
+  font-size: var(--fs-14);
+  color: var(--text);
+  background: var(--chrome);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  cursor: default;
+}
+
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: default; }
+input, textarea { font: inherit; color: inherit; user-select: text; }
+:focus-visible { outline: 2px solid var(--brand-300); outline-offset: 1px; }
+
+/* Tactile: dips to --press (0.96 buttons, 0.94 small icons, 0.98 rows) in 50 ms ease-out, then
+   recoils past rest and settles in 150 ms. Hover colors ease with MOTION.state. Disabled controls don't dip. */
+.tactile {
+  transition: transform 150ms var(--ease-recoil), background-color var(--state), color var(--state),
+    box-shadow var(--state), opacity var(--state);
+}
+.tactile:active:not(:disabled) { transform: scale(var(--press, 0.96)); transition: transform 50ms ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; }
+}

@@ -1,0 +1,44 @@
+{
+  "name": "bridle",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An open-source personal agent for macOS that lives in a folder and writes first.",
+  "license": "MIT",
+  "author": "Sean Scott <sean@sscott.dev>",
+  "homepage": "https://github.com/creatorhive/bridle",
+  "repository": { "type": "git", "url": "git+https://github.com/creatorhive/bridle.git" },
+  "bugs": "https://github.com/creatorhive/bridle/issues",
+  "main": "out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "start": "electron-vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
+    "test": "vitest run",
+    "build:native": "swift build -c release --package-path native/BridleHelper",
+    "rebuild": "electron-rebuild -f -o node-pty",
+    "postinstall": "electron-rebuild -f -o node-pty || echo \"node-pty did not build for Electron: Code terminals fall back to a plain shell\""
+  },
+  "dependencies": {
+    "@xterm/addon-fit": "0.11.0",
+    "@xterm/xterm": "6.0.0",
+    "cuelume": "0.2.4",
+    "lucide-react": "0.468.0",
+    "node-pty": "1.1.0",
+    "node-sqlite3-wasm": "0.8.60"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "4.2.0",
+    "@types/node": "20.17.10",
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.5",
+    "@vitejs/plugin-react": "4.3.4",
+    "electron": "33.4.11",
+    "electron-vite": "2.3.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "typescript": "5.6.3",
+    "vite": "5.4.11",
+    "vitest": "2.1.8"
+  }
+}

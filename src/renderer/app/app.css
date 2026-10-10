@@ -1,0 +1,125 @@
+/* Shell layout: chrome title bar and rail around a rounded panel
+   holding the 260px sidebar and the white content. */
+
+.app { display: flex; flex-direction: column; height: 100%; background: var(--chrome); }
+
+.titlebar {
+  position: relative; flex: none; height: 38px;
+  display: grid; place-items: center;
+  -webkit-app-region: drag;
+}
+.titlebar h1 {
+  margin: 0; max-width: 420px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: var(--fs-13); font-weight: 600; color: var(--text);
+}
+
+.app-body { flex: 1; min-height: 0; display: flex; }
+
+.rail { flex: none; width: 60px; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 4px 0 14px; }
+.rail-spacer { flex: 1; }
+.rail-button {
+  position: relative; width: 40px; height: 40px; border-radius: var(--r-control);
+  display: grid; place-items: center; color: var(--secondary); --press: 0.94;
+}
+.rail-button:hover { background: var(--hover); }
+.rail-button.selected { background: var(--selected); color: var(--text); }
+.rail-button .badge { position: absolute; top: 8px; right: 8px; width: 7px; height: 7px; border-radius: 50%; background: var(--brand-400); }
+.rail-avatar { --press: 0.94; border-radius: 50%; }
+.rail-me {
+  width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%;
+  background: linear-gradient(to bottom, #6e6ce0, #5856d6); color: #fff; font-size: var(--fs-13); font-weight: 600;
+}
+
+.panel {
+  flex: 1; min-width: 0; display: flex;
+  border-radius: var(--r-panel) var(--r-panel) 0 0; overflow: hidden;
+}
+.sidebar {
+  flex: none; width: 260px; display: flex; flex-direction: column; min-height: 0;
+  background: var(--sidebar); border-right: 1px solid rgba(223, 224, 226, 0.7);
+}
+.sidebar-head { display: flex; align-items: center; gap: 8px; padding: 14px 16px 0; }
+.sidebar-head img { width: 26px; height: 26px; }
+.sidebar-head span { flex: 1; font-size: var(--fs-17); font-weight: 600; }
+.sidebar-search {
+  display: flex; align-items: center; gap: 8px; height: 34px; margin: 12px 12px 8px; padding: 0 10px; border-radius: 10px;
+  background: rgba(0, 0, 0, 0.049); color: var(--tertiary); font-size: calc(13.5px * var(--zoom)); text-align: left; --press: 0.98;
+}
+.sidebar-search span { flex: 1; }
+.sidebar-search kbd {
+  height: 20px; padding: 0 6px; display: grid; place-items: center; border-radius: 5px; background: rgba(255, 255, 255, 0.8);
+  font-family: var(--font); font-size: var(--fs-11); font-weight: 500;
+}
+.sidebar-scroll { flex: 1; overflow-y: auto; padding: 0 10px 10px; display: flex; flex-direction: column; gap: 2px; }
+.sidebar-scroll::-webkit-scrollbar { display: none; }
+.sidebar-gap { height: 4px; flex: none; }
+
+.content { flex: 1; min-width: 0; min-height: 0; background: var(--content); position: relative; overflow: hidden; }
+/* The viewer slot opens from 0 to 480 px on the send spring, its panel pinned to the trailing edge so it
+   moves in from the right while the content makes room. */
+.viewer-slot { flex: none; width: 0; display: flex; justify-content: flex-end; overflow: hidden; transition: width var(--dur-send) var(--ease-send); }
+.viewer-slot:has(> aside:not([aria-hidden])) { width: 480px; }
+.viewer-slot > aside { animation: fade-in var(--dur-send) var(--ease-send); }
+
+/* Settings modal: 871×614 panel, 24px radius, over a 20% black backdrop. In and out on
+   timingCurve(0.16, 1, 0.3, 1, 0.3 s): the backdrop fades, the panel scales from 0.85 out of an 8 px blur. */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 100; display: grid; place-items: center;
+  background: rgba(0, 0, 0, 0.2); animation: fade-in var(--dur-modal) var(--ease-modal) both;
+}
+.settings {
+  width: 871px; height: 614px; max-width: calc(100vw - 32px); max-height: calc(100vh - 32px);
+  display: flex; position: relative; background: #fff; border-radius: var(--r-modal);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 12px 30px rgba(0, 0, 0, 0.12);
+  animation: modal-in var(--dur-modal) var(--ease-modal) both;
+}
+.modal-backdrop.leaving { animation: fade-out var(--dur-modal) var(--ease-modal) both; pointer-events: none; }
+.modal-backdrop.leaving .settings { animation: modal-out var(--dur-modal) var(--ease-modal) both; }
+.settings-rail {
+  width: 240px; flex: none; padding: 10px; display: flex; flex-direction: column; gap: 4px;
+  background: var(--panel-rail); border-right: 1px solid var(--separator); border-radius: var(--r-modal) 0 0 var(--r-modal);
+}
+.settings-rail > .heading { padding: 4px 8px 2px; font-size: var(--fs-14); font-weight: 500; color: var(--secondary); }
+.settings-rail-item {
+  display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: var(--r-control);
+  font-size: var(--fs-14); font-weight: 500; color: var(--secondary); text-align: left; --press: 0.98;
+}
+.settings-rail-item .icon { width: 20px; height: 20px; display: grid; place-items: center; color: var(--tertiary); }
+.settings-rail-item:hover { background: rgba(241, 241, 241, 0.6); }
+.settings-rail-item.selected { background: var(--wash); color: var(--text); }
+.settings-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.settings-title { display: flex; align-items: center; justify-content: space-between; padding: 32px 32px 12px; }
+.settings-title h2 { margin: 0; font-size: var(--fs-20); font-weight: 500; }
+.settings-close {
+  width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--wash); color: var(--tertiary); --press: 0.94;
+}
+.settings-scroll { flex: 1; min-height: 0; position: relative; display: flex; }
+.settings-page { flex: 1; overflow-y: auto; padding: 0 32px 32px; display: flex; flex-direction: column; gap: 20px; }
+.settings-fade {
+  position: absolute; top: 0; left: 0; right: 0; height: 40px; pointer-events: none;
+  background: linear-gradient(#fff, rgba(255, 255, 255, 0)); opacity: 0; transition: opacity 200ms ease-out;
+}
+.settings-fade.shown { opacity: 1; }
+/* "Saved": a capsule straddling the panel's bottom edge, rising 8 px into place from a 2 px blur. */
+.settings-toast {
+  position: absolute; left: 50%; bottom: 0; translate: -50% 50%; z-index: 1; pointer-events: none;
+  display: flex; align-items: center; gap: 4px; padding: 4px 10px 4px 6px; border-radius: 999px;
+  background: #fff; box-shadow: inset 0 0 0 1px var(--border), 0 4px 8px rgba(0, 0, 0, 0.08);
+  font-size: var(--fs-13); font-weight: 500; color: var(--text);
+  transform: translateY(8px); opacity: 0; filter: blur(2px);
+  transition: transform 200ms ease-out, opacity 200ms ease-out, filter 200ms ease-out;
+}
+.settings-toast.shown { transform: none; opacity: 1; filter: none; }
+
+@keyframes fade-in { from { opacity: 0; } }
+@keyframes fade-out { to { opacity: 0; } }
+@keyframes modal-in { from { opacity: 0; transform: scale(0.85); filter: blur(8px); } }
+@keyframes modal-out { to { opacity: 0; transform: scale(0.85); filter: blur(8px); } }
+
+/* Side chat (#side): a drag strip over the chat. */
+.side-chat { height: 100vh; display: flex; flex-direction: column; background: var(--content); }
+.side-chat-head {
+  flex: none; height: 32px; display: grid; place-items: center; -webkit-app-region: drag; user-select: none;
+  font-size: var(--fs-12); font-weight: 600; color: var(--tertiary); border-bottom: 1px solid var(--separator);
+}
