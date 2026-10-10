@@ -1,10 +1,12 @@
 import type { BridleAPI } from '../../shared/api'
 import { DEFAULT_SETTINGS, PROVIDERS, type SettingKey, type Settings } from '../../shared/types'
-import { run } from './util'
+import { isMac, run, userDataFile } from './util'
 
-// Preferences live in the macOS defaults domain "Bridle".
+// Preferences live in the macOS defaults domain "Bridle" (elsewhere, settings.json in userData).
 // Read once (`defaults export Bridle -` → plutil → JSON), cached in memory, written through
 // with `defaults write`. Unset keys fall back to DEFAULT_SETTINGS.
+
+const file = userDataFile('settings.json')
 
 const DOMAIN = 'Bridle'
 /** Numbers stored as integers; every other number is a float. */
@@ -15,6 +17,7 @@ let raw: Promise<Record<string, unknown>> | null = null
 
 /** The whole domain as JSON. Falls back to {} when it doesn't exist yet. */
 async function readDomain(): Promise<Record<string, unknown>> {
+  if (!isMac) return file.read()
   const exported = await run('defaults', ['export', DOMAIN, '-'])
   if (exported.code !== 0) return {}
   const json = await run('plutil', ['-convert', 'json', '-o', '-', '-'], { input: exported.stdout })
@@ -66,6 +69,7 @@ export async function setPref(key: string, value: string | boolean | number | Re
   else args = ['write', DOMAIN, key, '-dict', ...Object.entries(value).flat()]
   if (value === null) delete values[key]
   else values[key] = value
+  if (!isMac) return file.write(values)
   const r = await run('defaults', args)
   if (r.code !== 0 && value !== null) throw new Error(`defaults write ${key} failed: ${r.stderr.trim()}`)
 }

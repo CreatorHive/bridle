@@ -58,7 +58,7 @@ export function AutomationsPage() {
         {loops?.map((l) => (
           <div key={l.slug}>
             <SettingsRow label={l.title}
-              description={!l.script ? 'No check.sh yet'
+              description={!l.script ? 'No check script yet'
                 : !l.approved ? 'Its script changed or is new: read it, then approve it to let it run'
                 : `Every ${l.every} · last check ${when(l.lastRun)}`}>
               <div className={s.automationActions}>

@@ -6,7 +6,7 @@ import type { BridleAPI, BridleEvents } from '../shared/api'
 import type { Loop, Routine } from '../shared/types'
 import { banner, emit, onEmit } from './events'
 import { tasks } from './services/tasks'
-import { cliEnv, iso, run } from './services/util'
+import { cliEnv, isWindows, iso, run } from './services/util'
 import { workspaceRoot } from './services/workspace'
 
 // Work Bridle starts on its own, like Comma's Routines, Loops and Tasks. Each runs as an ordinary chat turn
@@ -133,6 +133,9 @@ async function save(state: State): Promise<void> {
   await writeFile(file, JSON.stringify(state, null, 2))
 }
 
+/** The loop's check script: check.sh (run with /bin/sh), or check.ps1 with PowerShell on Windows. */
+export const LOOP_SCRIPT = isWindows ? 'check.ps1' : 'check.sh'
+
 const sha = (s: string) => createHash('sha256').update(s).digest('hex')
 const slugOk = (slug: string) => /^[\w.-]+$/.test(slug) && slug !== '.' && slug !== '..'
 
@@ -201,7 +204,7 @@ async function readLoops(state: State): Promise<(Loop & { dir: string; prompt: s
     const dir = join(root, slug)
     const md = await readFile(join(dir, 'LOOP.md'), 'utf8').catch(() => null)
     if (md === null) continue
-    const script = await readFile(join(dir, 'check.sh'), 'utf8').catch(() => '')
+    const script = await readFile(join(dir, LOOP_SCRIPT), 'utf8').catch(() => '')
     const { fields, body } = frontMatter(md)
     const { title, text } = titled(body, slug)
     const st = state.loops[slug] ?? {}
@@ -222,8 +225,10 @@ async function checkLoop(l: { slug: string; title: string; dir: string; script: 
   const first = st.lastRun === undefined
   st.lastRun = iso()
   try {
-    const r = await withTimeout(run('/bin/sh', ['check.sh'], { cwd: l.dir, env: cliEnv() }), 60_000)
-    if (r.code !== 0) throw new Error(`check.sh exited with ${r.code}: ${(r.stderr || r.stdout).trim().slice(0, 500)}`)
+    const r = await withTimeout(isWindows
+      ? run('powershell.exe', ['-NoLogo', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', LOOP_SCRIPT], { cwd: l.dir, env: cliEnv() })
+      : run('/bin/sh', [LOOP_SCRIPT], { cwd: l.dir, env: cliEnv() }), 60_000)
+    if (r.code !== 0) throw new Error(`${LOOP_SCRIPT} exited with ${r.code}: ${(r.stderr || r.stdout).trim().slice(0, 500)}`)
     const output = r.stdout.trim().slice(0, MAX_OUTPUT)
     const changed = output !== (st.output ?? '')
     st.output = output
@@ -240,7 +245,7 @@ async function checkLoop(l: { slug: string; title: string; dir: string; script: 
 
 function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
   // ponytail: the timeout stops waiting, not the script; a hung check keeps its process until it ends.
-  return Promise.race([p, new Promise<T>((_, reject) => setTimeout(() => reject(new Error('check.sh took over a minute')), ms))])
+  return Promise.race([p, new Promise<T>((_, reject) => setTimeout(() => reject(new Error(`${LOOP_SCRIPT} took over a minute`)), ms))])
 }
 
 // MARK: Task runs
@@ -358,7 +363,7 @@ export const automations: BridleAPI['automations'] = {
   },
 
   async approve(slug) {
-    const script = await readFile(await loopFile(slug, 'check.sh'), 'utf8')
+    const script = await readFile(await loopFile(slug, LOOP_SCRIPT), 'utf8')
     const state = await load()
     // A fresh approval re-baselines: the next check records the output instead of waking the agent.
     state.loops[slug] = { ...state.loops[slug], approved: sha(script), lastRun: undefined, output: undefined, error: undefined }
@@ -374,7 +379,7 @@ export const automations: BridleAPI['automations'] = {
     }
     const l = (await readLoops(state)).find((x) => x.slug === slug)
     if (!l) throw new Error('No such loop')
-    if (!l.approved) throw new Error('Approve check.sh first')
+    if (!l.approved) throw new Error(`Approve ${LOOP_SCRIPT} first`)
     await checkLoop(l, state)
   }
 }

@@ -8,6 +8,7 @@
   display: grid; place-items: center;
   -webkit-app-region: drag;
 }
+[data-platform='win'] .titlebar, [data-platform='linux'] .titlebar { padding-right: 140px; }
 .titlebar h1 {
   margin: 0; max-width: 420px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   font-size: var(--fs-13); font-weight: 600; color: var(--text);

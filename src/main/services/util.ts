@@ -1,4 +1,7 @@
 import { spawn } from 'node:child_process'
+import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { app } from 'electron'
 
 // Small helpers shared by the services. No shell anywhere: every command is argv.
 
@@ -11,7 +14,7 @@ export interface RunResult {
 /** Runs a binary (no shell), optionally feeding `input` on stdin. Never rejects on a non-zero exit. */
 export function run(cmd: string, args: string[], options: { input?: string; cwd?: string; env?: NodeJS.ProcessEnv } = {}): Promise<RunResult> {
   return new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, { cwd: options.cwd, env: options.env, stdio: ['pipe', 'pipe', 'pipe'] })
+    const child = spawn(cmd, args, { cwd: options.cwd, env: options.env, stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true })
     let stdout = ''
     let stderr = ''
     child.stdout.setEncoding('utf8').on('data', (d: string) => (stdout += d))
@@ -44,4 +47,40 @@ export function cliEnv(extra: Record<string, string> = {}): NodeJS.ProcessEnv {
   const env = { ...process.env, ...extra }
   for (const key of ['ANTHROPIC_API_KEY', 'ANTHROPIC_AUTH_TOKEN', 'ANTHROPIC_BASE_URL', 'CLAUDE_CODE_OAUTH_TOKEN']) delete env[key]
   return env
+}
+
+/** macOS keeps settings in `defaults` and keys in the Keychain; elsewhere they're JSON files in userData. */
+export const isMac = process.platform === 'darwin'
+
+/** A private JSON object in Electron's userData folder (settings and secrets off macOS). */
+export function userDataFile(name: string): { read(): Record<string, unknown>; write(value: Record<string, unknown>): void } {
+  const path = () => join(app.getPath('userData'), name)
+  return {
+    read() {
+      try {
+        return JSON.parse(readFileSync(path(), 'utf8')) as Record<string, unknown>
+      } catch {
+        return {}
+      }
+    },
+    write(value) {
+      mkdirSync(dirname(path()), { recursive: true })
+      writeFileSync(`${path()}.tmp`, JSON.stringify(value, null, 2), { mode: 0o600 })
+      renameSync(`${path()}.tmp`, path())
+    }
+  }
+}
+
+export const isWindows = process.platform === 'win32'
+
+/** A login shell that runs `script` and exits: zsh on macOS, $SHELL on Linux, PowerShell on Windows. */
+export function shellCommand(script: string): [string, string[]] {
+  if (isWindows) return ['powershell.exe', ['-NoLogo', '-NoProfile', '-Command', script]]
+  return [isMac ? '/bin/zsh' : process.env.SHELL || '/bin/bash', ['-lc', script]]
+}
+
+/** An interactive shell for a terminal. */
+export function interactiveShell(): [string, string[]] {
+  if (isWindows) return ['powershell.exe', ['-NoLogo']]
+  return [isMac ? '/bin/zsh' : process.env.SHELL || '/bin/bash', ['-l']]
 }

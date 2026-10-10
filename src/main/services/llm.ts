@@ -1,5 +1,7 @@
+import { spawnSync } from 'node:child_process'
 import { accessSync, constants } from 'node:fs'
 import { homedir, tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { keychain } from './keychain'
 import { settings } from './settings'
 import { cliEnv, run } from './util'
@@ -9,7 +11,11 @@ import { cliEnv, run } from './util'
 /** The `claude` binary, in the places Claude Code installs it. */
 export function claudeBinary(): string | null {
   const home = homedir()
-  for (const p of [`${home}/.local/bin/claude`, '/opt/homebrew/bin/claude', '/usr/local/bin/claude', `${home}/.claude/local/claude`]) {
+  // On Windows the native installer puts claude.exe in ~/.local/bin; a .cmd shim (npm) can't be spawned without a shell.
+  const candidates = process.platform === 'win32'
+    ? [join(home, '.local', 'bin', 'claude.exe'), ...whereExe('claude')]
+    : [`${home}/.local/bin/claude`, '/opt/homebrew/bin/claude', '/usr/local/bin/claude', `${home}/.claude/local/claude`]
+  for (const p of candidates) {
     try {
       accessSync(p, constants.X_OK)
       return p
@@ -56,4 +62,10 @@ export async function complete(prompt: string, system = 'You triage a person\'s 
   })
   const json = (await res.json()) as { choices?: { message?: { content?: string } }[] }
   return json.choices?.[0]?.message?.content ?? ''
+}
+
+/** Every `name`.exe on the PATH (Windows `where`). */
+function whereExe(name: string): string[] {
+  const r = spawnSync('where', [`${name}.exe`], { encoding: 'utf8', windowsHide: true })
+  return r.status === 0 ? r.stdout.split(/\r?\n/).filter(Boolean) : []
 }

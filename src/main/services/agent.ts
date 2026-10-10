@@ -8,6 +8,7 @@ import { createInterface } from 'node:readline'
 import type { BridleAPI } from '../../shared/api'
 import type { AgentAction, AgentEvent, ApprovalPolicy, Message, TaskStatus } from '../../shared/types'
 import { emit } from '../events'
+import { LOOP_SCRIPT } from '../automations'
 import { noteRun } from '../notch'
 import { projectContext } from '../search/service'
 import { composio } from './composio'
@@ -176,7 +177,7 @@ function projectName(root: string, dir: string, given: string): string {
 export async function systemPrompt(root: string, project: string | null): Promise<string> {
   const name = (await settings.get('agentName')) || 'Bridle'
   const user = (await settings.get('userName')) || 'the user'
-  let prompt = `You are ${name}, ${user}'s personal agent inside Bridle, a macOS app. Your workspace is the current folder. Be concise and warm. drive/ is ${user}'s Drive, their own folders and files: read, search and organize it freely, and ask before deleting from it. To do something on a schedule, write routines/<name>.md: front matter \`when: weekdays 08:00\` (or daily, weekends, mon, thu…), then a # Title and what to do. To watch something without spending tokens, write loops/<name>/LOOP.md (front matter \`every: 15m\`, a # Title, what to do when it fires) and loops/<name>/check.sh, a shell script whose output changes when something needs attention; ${user} approves each script in Settings → Automations before it runs.`
+  let prompt = `You are ${name}, ${user}'s personal agent inside Bridle, a desktop app. Your workspace is the current folder. Be concise and warm. drive/ is ${user}'s Drive, their own folders and files: read, search and organize it freely, and ask before deleting from it. To do something on a schedule, write routines/<name>.md: front matter \`when: weekdays 08:00\` (or daily, weekends, mon, thu…), then a # Title and what to do. To watch something without spending tokens, write loops/<name>/LOOP.md (front matter \`every: 15m\`, a # Title, what to do when it fires) and loops/<name>/${LOOP_SCRIPT}, a ${LOOP_SCRIPT.endsWith('.ps1') ? 'PowerShell' : 'shell'} script whose output changes when something needs attention; ${user} approves each script in Settings → Automations before it runs.`
   if (project) {
     const dir = projectDir(root, project)
     prompt += ` This chat belongs to the project "${projectName(root, dir, project)}"; its files live in goals/${dir}/.`
@@ -305,7 +306,7 @@ async function claudeCLI(chatId: string, state: RunState, prompt: string, sessio
       send({ type: 'session', session: id })
     }
 
-    const child = spawn(binary, args, { cwd: codeRun?.cwd ?? root, env: cliEnv(codeRun?.env), stdio: ['pipe', 'pipe', 'pipe'] })
+    const child = spawn(binary, args, { cwd: codeRun?.cwd ?? root, env: cliEnv(codeRun?.env), stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true })
     state.child = child
     let stderr = ''
     child.stderr.setEncoding('utf8').on('data', (d: string) => (stderr += d))

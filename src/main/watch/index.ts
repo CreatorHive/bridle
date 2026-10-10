@@ -348,6 +348,7 @@ async function forward(text: string): Promise<void> {
 
 /** One iMessage through Messages, osascript with argv (no shell, nothing spliced into the script). Error text or null. */
 async function sendIMessage(text: string, handle: string): Promise<string | null> {
+  if (process.platform !== 'darwin') return 'iMessage needs a Mac'
   const r = await run('/usr/bin/osascript', iMessageArgs(text, handle))
   return r.code === 0 ? null : r.stderr.trim() || "Messages couldn't send it"
 }

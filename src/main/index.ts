@@ -20,8 +20,10 @@ function createWindow(): BrowserWindow {
     minWidth: 1000,
     minHeight: 640,
     show: false,
-    titleBarStyle: 'hiddenInset',
-    trafficLightPosition: { x: 14, y: 13 },
+    // macOS: traffic lights inset into the 38px chrome strip. Windows/Linux: the system buttons drawn over it.
+    ...(process.platform === 'darwin'
+      ? { titleBarStyle: 'hiddenInset' as const, trafficLightPosition: { x: 14, y: 13 } }
+      : { titleBarStyle: 'hidden' as const, titleBarOverlay: { color: '#EDEDEE', symbolColor: '#1A1B1E', height: 38 } }),
     backgroundColor: '#EDEDEE',
     icon, // Linux/Windows; macOS takes the Dock icon below
     webPreferences: {

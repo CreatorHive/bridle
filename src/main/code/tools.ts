@@ -5,6 +5,7 @@ import { join } from 'node:path'
 import type { DevToolsState, RunConfig, Space, Workspace } from '../../shared/types'
 import { emit } from '../events'
 import { shellEnv } from './git'
+import { interactiveShell, isWindows, shellCommand } from '../services/util'
 import { clean, detect, serverURL } from './runconfigs'
 
 // Run configurations, workspace setup and terminals. Kept in main for as
@@ -65,8 +66,9 @@ export async function runSetup(space: Space, w: Workspace): Promise<void> {
   const script = setupScript(space, w)
   if (!script || t.state.settingUp) return
   append(t, 'setup', `$ ${space.setupScript?.trim() ? space.setupScript : '.bridle/setup.sh'}\n`)
-  const child = spawn('/bin/zsh', ['-lc', script], {
-    cwd: w.path, stdio: ['ignore', 'pipe', 'pipe'],
+  const [shell, shellArgs] = shellCommand(script)
+  const child = spawn(shell, shellArgs, {
+    cwd: w.path, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true,
     env: await shellEnv({ BRIDLE_ROOT_PATH: space.root, BRIDLE_WORKSPACE_NAME: w.name, TERM: 'dumb' })
   })
   t.state.settingUp = true
@@ -74,7 +76,7 @@ export async function runSetup(space: Space, w: Workspace): Promise<void> {
   const out = (d: string) => append(t, 'setup', d)
   child.stdout?.setEncoding('utf8').on('data', out)
   child.stderr?.setEncoding('utf8').on('data', out)
-  child.on('error', (e) => append(t, 'setup', `Couldn't start zsh: ${e.message}\n`))
+  child.on('error', (e) => append(t, 'setup', `Couldn't start ${shell}: ${e.message}\n`))
   child.on('close', (code) => {
     append(t, 'setup', code === 0 ? '\nSetup finished.\n' : `\nSetup failed (exit ${code ?? -1}).\n`)
     t.state.settingUp = false
@@ -92,7 +94,9 @@ export async function runConfig(w: Workspace, c: RunConfig): Promise<void> {
   t.state.exitCode = null
   t.partial = ''
   append(t, 'run', `$ ${c.command}\n`, true)
-  const child = spawn('/bin/zsh', ['-lc', c.command], { cwd: w.path, detached: true, stdio: ['ignore', 'pipe', 'pipe'], env: await shellEnv({ TERM: 'dumb' }) })
+  const [shell, shellArgs] = shellCommand(c.command)
+  // Its own process group (not on Windows, where detached opens a console), so Stop reaches what it spawned.
+  const child = spawn(shell, shellArgs, { cwd: w.path, detached: !isWindows, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'], env: await shellEnv({ TERM: 'dumb' }) })
   t.child = child
   publish(t)
   /** Finished lines are cleaned, shown, and scanned for a server address. */
@@ -134,9 +138,14 @@ export function stopRun(id: string): void {
   if (!t || !pid) return
   t.child = undefined
   t.state.running = null
-  const kill = (sig: NodeJS.Signals) => { try { process.kill(-pid, sig) } catch { /* gone */ } }
-  kill('SIGTERM')
-  setTimeout(() => kill('SIGKILL'), 2000)
+  if (isWindows) {
+    // No process groups: taskkill ends the tree.
+    spawn('taskkill', ['/pid', String(pid), '/T', '/F'], { windowsHide: true }).on('error', () => {})
+  } else {
+    const kill = (sig: NodeJS.Signals) => { try { process.kill(-pid, sig) } catch { /* gone */ } }
+    kill('SIGTERM')
+    setTimeout(() => kill('SIGKILL'), 2000)
+  }
   publish(t)
 }
 
@@ -182,10 +191,14 @@ export async function termOpen(w: Workspace, cols: number, rows: number): Promis
   const p = loadPty()
   let term: Term
   if (p) {
-    const proc = p.spawn('/bin/zsh', ['-l'], { name: 'xterm-256color', cols, rows, cwd: w.path, env: env as Record<string, string> })
+    const [shell, shellArgs] = interactiveShell()
+    const proc = p.spawn(shell, shellArgs, { name: 'xterm-256color', cols, rows, cwd: w.path, env: env as Record<string, string> })
     proc.onData(data)
     proc.onExit(exited)
     term = { write: (d) => proc.write(d), resize: (c, r) => proc.resize(Math.max(c, 2), Math.max(r, 1)), kill: () => proc.kill() }
+  } else if (isWindows) {
+    data('Terminals need node-pty: run `npm run rebuild`.\r\n')
+    term = { write: () => {}, resize: () => {}, kill: () => {} }
   } else {
     // Fallback without node-pty: script(1) gives zsh a real tty, but resizing can't reach it.
     const child = spawn('/usr/bin/script', ['-q', '/dev/null', '/bin/zsh', '-l'], { cwd: w.path, env: { ...env, COLUMNS: String(cols), LINES: String(rows) } })

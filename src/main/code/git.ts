@@ -4,10 +4,11 @@ import { copyFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import type { ChangedFile, DiffHunk, DiffLine, FileChange } from '../../shared/types'
-import { run, type RunResult } from '../services/util'
+import { isWindows, run, type RunResult } from '../services/util'
 
 // Every command is argv (no shell) through /usr/bin/env with the login PATH, so a missing tool
-// exits 127; git never prompts (there's no terminal to answer it).
+// exits 127; git never prompts (there's no terminal to answer it). On Windows, GUI apps already get the
+// user's PATH and there's no /usr/bin/env: the tool runs directly.
 
 let loginPATH: Promise<string | null> | null = null
 
@@ -29,7 +30,7 @@ function readLoginPATH(): Promise<string | null> {
 
 /** This process's environment with the login PATH, plus `extra`. */
 export async function shellEnv(extra: Record<string, string> = {}): Promise<NodeJS.ProcessEnv> {
-  loginPATH ??= process.env.VITEST ? Promise.resolve(null) : readLoginPATH()
+  loginPATH ??= process.env.VITEST || isWindows ? Promise.resolve(null) : readLoginPATH()
   const path = await loginPATH
   return { ...process.env, ...(path ? { PATH: path } : {}), ...extra }
 }
@@ -39,7 +40,7 @@ export type Result = RunResult & { ok: boolean }
 /** `args[0]` looked up on the login PATH, in `cwd`. Never rejects. */
 export async function sh(args: string[], cwd: string, env: Record<string, string> = {}): Promise<Result> {
   try {
-    const r = await run('/usr/bin/env', args, { cwd, env: await shellEnv(env) })
+    const r = isWindows ? await run(args[0], args.slice(1), { cwd, env: await shellEnv(env) }) : await run('/usr/bin/env', args, { cwd, env: await shellEnv(env) })
     return { ...r, ok: r.code === 0 }
   } catch (e) {
     return { code: -1, stdout: '', stderr: e instanceof Error ? e.message : String(e), ok: false }

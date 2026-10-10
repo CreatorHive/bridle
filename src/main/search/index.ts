@@ -128,11 +128,11 @@ export async function textOf(path: string): Promise<string | null> {
   if (isChat(path)) return readFile(path, 'utf8').then(chatText, () => null)
   if (nativeExtracts(path)) return nativeText(path)
   const ext = extname(path).slice(1).toLowerCase()
-  if (ext === 'pdf') {
+  if (ext === 'pdf' && process.platform === 'darwin') { // PDFKit through JXA; elsewhere PDFs aren't indexed yet
     const r = await run('osascript', ['-l', 'JavaScript', '-e', PDF_TEXT, path]).catch(() => null)
     return r?.code === 0 ? r.stdout : null
   }
-  if (['docx', 'doc', 'rtf', 'odt'].includes(ext)) {
+  if (['docx', 'doc', 'rtf', 'odt'].includes(ext) && process.platform === 'darwin') {
     const r = await run('textutil', ['-convert', 'txt', '-stdout', path]).catch(() => null)
     return r?.code === 0 ? r.stdout : null
   }

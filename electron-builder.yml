@@ -12,13 +12,14 @@ files:
   - package.json
 asarUnpack:
   - "**/node_modules/node-pty/**"
-extraResources:
-  - from: native/BridleHelper/.build/release/bridle-helper
-    to: bridle-helper
-  - from: native/BridleHelper/.build/release/bridle-notch
-    to: bridle-notch
 mac:
   category: public.app-category.productivity
+  # The Swift helpers (macOS only): on-device search, OCR, transcription, dictation and the notch.
+  extraResources:
+    - from: native/BridleHelper/.build/release/bridle-helper
+      to: bridle-helper
+    - from: native/BridleHelper/.build/release/bridle-notch
+      to: bridle-notch
   icon: build/icon.icns
   target:
     - target: dmg
@@ -31,6 +32,14 @@ mac:
     LSMinimumSystemVersion: "26.0"
 dmg:
   artifactName: Bridle-${version}-${arch}.dmg
+# Windows: an x64 installer, unsigned for now (SmartScreen warns until it's signed).
+win:
+  icon: resources/icon.png
+  target:
+    - target: nsis
+      arch: x64
+nsis:
+  artifactName: Bridle-${version}-setup-${arch}.${ext}
 publish:
   provider: github
   owner: CreatorHive
