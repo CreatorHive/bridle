@@ -9,6 +9,7 @@ import { agent } from './services/agent'
 import { calendar, composio, gmail } from './services/composio'
 import { composioKey, keychain } from './services/keychain'
 import { claudeBinary } from './services/llm'
+import { lmStudio } from './services/lmstudio'
 import { avatar, memory } from './services/memory'
 import { settings } from './services/settings'
 import { mcp } from './services/mcp'
@@ -45,7 +46,7 @@ const about: InvokeAPI['about'] = {
 }
 
 /** Every contract group, implemented. Typed against BridleAPI, so a missing method fails typecheck. */
-const services: InvokeAPI = { workspace, settings, keychain, composio, gmail, calendar, tasks, automations, mcp, side: sideChat, agent, watcher, away, notify, search, viewer, memory, avatar, about, code, native, shell, onboarding, phone }
+const services: InvokeAPI = { workspace, settings, keychain, composio, gmail, calendar, tasks, automations, mcp, side: sideChat, agent, watcher, away, notify, search, viewer, memory, avatar, lmStudio, about, code, native, shell, onboarding, phone }
 
 /** One ipcMain.handle per method in API_METHODS: "<group>:<method>" → services[group][method](...args). */
 export function registerIpc(): void {

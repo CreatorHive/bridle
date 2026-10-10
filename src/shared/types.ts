@@ -356,12 +356,13 @@ export interface Loop {
 export type ApprovalPolicy = 'Always ask' | 'Allow app actions' | 'Allow everything'
 
 /** Providers (settings key "provider"). */
-export type Provider = 'Claude CLI' | 'OpenRouter' | 'Local' | 'Mock'
+export type Provider = 'Claude CLI' | 'LM Studio' | 'OpenRouter' | 'Local' | 'Mock'
 
 /** What each provider offers and the setting holding its choice.
- *  Local's list is just the `localModel` setting. */
+ *  LM Studio and Local share the `localModel` setting; LM Studio lists its models live (lmStudio.models). */
 export const PROVIDERS: Record<Provider, { models: string[]; modelKey: 'model' | 'openRouterModel' | 'localModel' | null }> = {
   'Claude CLI': { models: ['Claude Opus', 'Claude Sonnet', 'Claude Haiku'], modelKey: 'model' },
+  'LM Studio': { models: [], modelKey: 'localModel' },
   OpenRouter: {
     models: ['anthropic/claude-opus-5.5', 'anthropic/claude-sonnet-5.5', 'anthropic/claude-haiku-5.5',
       'openai/gpt-5.6-luna', 'google/gemini-3.8-flash', 'deepseek/deepseek-v4.1-flash', 'x-ai/grok-4.7'],
@@ -369,6 +370,18 @@ export const PROVIDERS: Record<Provider, { models: string[]; modelKey: 'model' |
   },
   Local: { models: [], modelKey: 'localModel' },
   Mock: { models: ['Mock'], modelKey: null }
+}
+
+/** A model LM Studio has downloaded (Settings → Models). */
+export interface LocalModel {
+  /** Its key, e.g. "openai/gpt-oss-20b". */
+  id: string
+  name: string
+  loaded: boolean
+  /** The most context it can hold, in tokens. */
+  context: number | null
+  /** Trained for tool calls: the agent works best with these. */
+  tools: boolean
 }
 
 /** A permission request: answer with `agent.respondPermission(requestId, allow)`. */

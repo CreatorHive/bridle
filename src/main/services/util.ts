@@ -42,11 +42,12 @@ export function sortKeys(value: unknown): unknown {
   return value
 }
 
-/** Environment for the Claude CLI: a stray key would override the user's subscription. */
+/** Environment for the Claude CLI: a stray key would override the user's subscription. `extra` (LM Studio's
+ *  ANTHROPIC_BASE_URL) is deliberate and goes on after. */
 export function cliEnv(extra: Record<string, string> = {}): NodeJS.ProcessEnv {
-  const env = { ...process.env, ...extra }
+  const env = { ...process.env }
   for (const key of ['ANTHROPIC_API_KEY', 'ANTHROPIC_AUTH_TOKEN', 'ANTHROPIC_BASE_URL', 'CLAUDE_CODE_OAUTH_TOKEN']) delete env[key]
-  return env
+  return { ...env, ...extra }
 }
 
 /** macOS keeps settings in `defaults` and keys in the Keychain; elsewhere they're JSON files in userData. */

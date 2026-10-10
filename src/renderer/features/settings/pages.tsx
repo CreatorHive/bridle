@@ -1,9 +1,9 @@
 import { useEffect, useState, type ComponentType } from 'react'
 import { McpServers } from './McpServers'
 import { AutomationsPage } from './AutomationsPage'
-import { Calendar, CircleCheck, CircleX, File as FileIcon, Folder, Globe, Key, Mail, Package, Search, Server, Smartphone, Sparkles, User } from 'lucide-react'
-import { PROVIDERS, type ApprovalPolicy, type PhoneStatus, type Provider, type WorkspaceFile } from '../../../shared/types'
-import { Avatar, Button, ChoiceMenu, Pill, SectionLabel, SettingsCard, SettingsRow, Toggle } from '../../components'
+import { Calendar, ChevronsUpDown, CircleCheck, CircleX, File as FileIcon, Folder, Globe, Key, Mail, Package, Search, Server, Smartphone, Sparkles, User } from 'lucide-react'
+import { PROVIDERS, type ApprovalPolicy, type LocalModel, type PhoneStatus, type Provider, type WorkspaceFile } from '../../../shared/types'
+import { Avatar, Button, ChoiceMenu, Menu, Pill, SectionLabel, SettingsCard, SettingsRow, Toggle } from '../../components'
 import { useApp, type SettingsPage } from '../../app/store'
 import { play } from '../../sound'
 import { byteCount } from '../files/logic'
@@ -259,15 +259,21 @@ function Models() {
           <SettingField setting="openRouterModel" icon={<Package size={14} />} placeholder="anthropic/claude-sonnet-5.5" label="OpenRouter model" />
         </SettingsRow>
       </SettingsCard>
-      <SectionLabel>Local</SectionLabel>
-      <SettingsCard>
-        <SettingsRow label="Endpoint" description="Ollama, LM Studio or any OpenAI-compatible server">
-          <SettingField setting="localEndpoint" icon={<Server size={14} />} placeholder="http://localhost:1234/v1" label="Local endpoint" />
-        </SettingsRow>
-        <SettingsRow label="Model">
-          <SettingField setting="localModel" icon={<Package size={14} />} placeholder="llama3" label="Local model" />
-        </SettingsRow>
-      </SettingsCard>
+      <SectionLabel>LM Studio</SectionLabel>
+      <LmStudioCard />
+      {s_.provider === 'Local' && (
+        <>
+          <SectionLabel>Local</SectionLabel>
+          <SettingsCard>
+            <SettingsRow label="Endpoint" description="Ollama or any OpenAI-compatible server. Replies only: no tools">
+              <SettingField setting="localEndpoint" icon={<Server size={14} />} placeholder="http://localhost:11434/v1" label="Local endpoint" />
+            </SettingsRow>
+            <SettingsRow label="Model">
+              <SettingField setting="localModel" icon={<Package size={14} />} placeholder="llama3" label="Local model" />
+            </SettingsRow>
+          </SettingsCard>
+        </>
+      )}
       <SectionLabel>Search</SectionLabel>
       <SettingsCard>
         <SettingsRow label="Embeddings" description="On-device stays private; endpoints search better">
@@ -282,6 +288,51 @@ function Models() {
         )}
       </SettingsCard>
     </>
+  )
+}
+
+/** LM Studio: is its server up, which model, and the token if it asks for one. The agent runs through Claude Code
+ *  against it, so tools, approvals and MCP all work on a local model. */
+function LmStudioCard() {
+  const { state, setSetting } = useApp()
+  const [models, setModels] = useState<LocalModel[] | null>(null)
+  const [error, setError] = useState('')
+  const [token, setToken] = useState('')
+  const refresh = () => {
+    setError('')
+    window.bridle.lmStudio.models().then(setModels, (e: Error) => {
+      setModels(null)
+      setError(e.message.replace(/^Error invoking remote method '[^']+': (Error: )?/, ''))
+    })
+  }
+  useEffect(() => {
+    refresh()
+    window.bridle.keychain.get('lmstudio').then((k) => setToken(k ?? ''), () => {})
+  }, [state.settings?.localEndpoint])
+  const current = models?.find((m) => m.id === state.settings?.localModel)
+  const detail = (m: LocalModel) => [m.loaded && 'loaded', m.context && `${Math.round(m.context / 1024)}K`, m.tools && 'tools'].filter(Boolean).join(' · ')
+  return (
+    <SettingsCard>
+      <SettingsRow label="Server" description={error || (models ? `Running · ${models.length} model${models.length === 1 ? '' : 's'}. Your agent runs on it with tools and approvals` : 'Checking…')}>
+        <div className={s.automationActions}>
+          {error && <Pill cue={null} onClick={refresh}>Retry</Pill>}
+          <SettingField setting="localEndpoint" icon={<Server size={14} />} placeholder="http://localhost:1234" label="LM Studio server" />
+        </div>
+      </SettingsRow>
+      <SettingsRow label="Model" description={current ? detail(current) : models?.length === 0 ? 'Download a model in LM Studio first' : 'Needs 32K context; Bridle loads it with that'}>
+        {models?.length ? (
+          <Menu label="LM Studio model"
+            trigger={<span className="b-menu-trigger"><span>{current?.name ?? 'Pick a model'}</span><ChevronsUpDown size={12} /></span>}
+            items={models.map((m) => ({ label: `${m.name}${detail(m) ? `  ·  ${detail(m)}` : ''}`, checked: m.id === current?.id, onSelect: () => setSetting('localModel', m.id) }))} />
+        ) : (
+          <SettingField setting="localModel" icon={<Package size={14} />} placeholder="openai/gpt-oss-20b" label="LM Studio model" />
+        )}
+      </SettingsRow>
+      <SettingsRow label="API token" description="Only if LM Studio requires authentication. Stored in your Keychain">
+        <ValueField icon={<Key size={14} />} value={token} onChange={setToken} secure placeholder="Optional" label="LM Studio API token"
+          onCommit={() => window.bridle.keychain.set('lmstudio', token).then(() => { showSaved(); refresh() }, () => play('error', { emphasis: 'subtle' }))} />
+      </SettingsRow>
+    </SettingsCard>
   )
 }
 

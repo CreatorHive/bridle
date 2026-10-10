@@ -22,6 +22,7 @@ import type {
   LinearDetail,
   Loop,
   LinkProgress,
+  LocalModel,
   McpServer,
   Mail,
   Mailbox,
@@ -268,6 +269,12 @@ export interface BridleAPI {
     remove(): Promise<void>
   }
 
+  /** LM Studio's server (Settings → Models): src/main/services/lmstudio.ts. */
+  lmStudio: {
+    /** Its downloaded chat models, loaded first. Throws when the server isn't running. */
+    models(): Promise<LocalModel[]>
+  }
+
   /** Read-only facts Settings shows. */
   about: {
     /** The `claude` binary Bridle runs, or null (Settings → Models). */
@@ -461,6 +468,7 @@ export const API_METHODS: { [G in GroupName]: { [M in keyof InvokeAPI[G]]: true 
   viewer: { inspect: true, list: true, save: true, icon: true },
   memory: { prompt: true, apply: true },
   avatar: { get: true, choose: true, remove: true },
+  lmStudio: { models: true },
   about: { claudeBinary: true, composioKeySource: true },
   code: {
     spaces: true, addSpace: true, removeSpace: true, trustSpace: true, isRepo: true, initRepo: true,

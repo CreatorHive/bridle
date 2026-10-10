@@ -26,7 +26,7 @@ export const POLICY_CAPTION: Record<ApprovalPolicy, string> = {
 /** Provider.current.models / .model / .modelKey, and the top bar's label ("anthropic/x" → "x"). */
 export function modelChoice(s: Settings): { models: string[]; key: 'model' | 'openRouterModel' | 'localModel' | null; value: string; label: string } {
   const p = PROVIDERS[s.provider] ?? PROVIDERS['Claude CLI']
-  const models = s.provider === 'Local' ? [s.localModel] : p.models
+  const models = p.modelKey === 'localModel' ? [s.localModel] : p.models
   const value = (p.modelKey && s[p.modelKey]) || models[0] || ''
   return { models, key: p.modelKey, value, label: value.split('/').pop() ?? value }
 }

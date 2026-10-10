@@ -14,6 +14,7 @@ import { projectContext } from '../search/service'
 import { composio } from './composio'
 import { cliServers, recordMcpStatus, trustedMcp } from './mcp'
 import { claudeBinary, complete, openAIBase } from './llm'
+import { lmStudioRun } from './lmstudio'
 import { settings } from './settings'
 import { tasks } from './tasks'
 import { cliEnv, iso, sleep, sortKeys } from './util'
@@ -266,8 +267,11 @@ export interface CodeRun {
 async function claudeCLI(chatId: string, state: RunState, prompt: string, session: string | null, system: string,
   dirs: string[], root: string, send: Send, codeRun?: CodeRun): Promise<void> {
   const binary = claudeBinary()
-  if (!binary) throw new Error('Claude CLI not found. Install Claude Code, or pick another provider in Settings → Models.')
+  if (!binary) throw new Error('Claude CLI not found. Install Claude Code (LM Studio runs through it too), or pick another provider in Settings → Models.')
   const alias = ({ 'Claude Opus': 'opus', 'Claude Sonnet': 'sonnet', 'Claude Haiku': 'haiku' } as Record<string, string>)[await settings.get('model')] ?? 'sonnet'
+  // Chats on LM Studio: the same CLI and agent, pointed at a local model. Code turns stay on Claude.
+  const local = !codeRun && (await settings.get('provider')) === 'LM Studio'
+    ? await lmStudioRun((status) => send({ type: 'status', status })) : null
   const temp: string[] = []
   try {
     // Connected apps come in as Composio's MCP server. Its header is the project key: a private 0600 file, not argv.
@@ -295,7 +299,7 @@ async function claudeCLI(chatId: string, state: RunState, prompt: string, sessio
     // Never --dangerously-skip-permissions: tools that need approval are asked of Bridle over stdio.
     const args = ['-p', '--input-format', 'stream-json', '--permission-prompt-tool', 'stdio',
       '--output-format', 'stream-json', '--verbose', '--include-partial-messages',
-      '--model', alias, '--append-system-prompt-file', promptFile,
+      '--model', local?.model ?? alias, '--append-system-prompt-file', promptFile,
       '--setting-sources', codeRun?.settingSources ?? '', '--strict-mcp-config', '--mcp-config', mcpConfig,
       '--disable-slash-commands', ...dirs.flatMap((d) => ['--add-dir', d])]
     if (codeRun?.permissionMode) args.push('--permission-mode', codeRun.permissionMode)
@@ -309,7 +313,7 @@ async function claudeCLI(chatId: string, state: RunState, prompt: string, sessio
       send({ type: 'session', session: id })
     }
 
-    const child = spawn(binary, args, { cwd: codeRun?.cwd ?? root, env: cliEnv(codeRun?.env), stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true })
+    const child = spawn(binary, args, { cwd: codeRun?.cwd ?? root, env: cliEnv({ ...codeRun?.env, ...local?.env }), stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true })
     state.child = child
     let stderr = ''
     child.stderr.setEncoding('utf8').on('data', (d: string) => (stderr += d))
@@ -554,7 +558,7 @@ export const agent: BridleAPI['agent'] = {
       }
       const system = (await systemPrompt(root, project)) + bootstrap(root) + GUIDE + (context ? '\n\n' + context : '')
       const provider = await settings.get('provider')
-      if (provider === 'Claude CLI') {
+      if (provider === 'Claude CLI' || provider === 'LM Studio') {
         const dirs = project ? links(root, projectDir(root, project)) : []
         await claudeCLI(chatId, state, prompt, options?.sessionID ?? null, system, dirs, root, send)
       } else if (provider === 'Mock') {

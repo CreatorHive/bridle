@@ -3,6 +3,7 @@ import { accessSync, constants } from 'node:fs'
 import { homedir, tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { keychain } from './keychain'
+import { origin } from './lmstudio'
 import { settings } from './settings'
 import { cliEnv, run } from './util'
 
@@ -26,13 +27,14 @@ export function claudeBinary(): string | null {
   return null
 }
 
-/** OpenRouter or a local OpenAI-compatible server. */
+/** OpenRouter or a local OpenAI-compatible server. LM Studio's one-shot answers (titles, the watcher) go here too. */
 export async function openAIBase(): Promise<{ base: string; key: string | null; model: string; local: boolean }> {
   const provider = await settings.get('provider')
-  const local = provider === 'Local'
+  const local = provider === 'Local' || provider === 'LM Studio'
+  const endpoint = await settings.get('localEndpoint')
   return {
-    base: local ? (await settings.get('localEndpoint')) || 'http://localhost:1234/v1' : 'https://openrouter.ai/api/v1',
-    key: local ? null : await keychain.get('openrouter'),
+    base: provider === 'LM Studio' ? `${origin(endpoint)}/v1` : local ? endpoint || 'http://localhost:1234/v1' : 'https://openrouter.ai/api/v1',
+    key: provider === 'LM Studio' ? await keychain.get('lmstudio') : local ? null : await keychain.get('openrouter'),
     model: local ? await settings.get('localModel') : await settings.get('openRouterModel'),
     local
   }
@@ -52,9 +54,9 @@ export async function complete(prompt: string, system = 'You triage a person\'s 
     if (r.code !== 0) throw new Error(`The model check failed (claude exited ${r.code})`)
     return r.stdout
   }
-  const { base, key, model, local } = await openAIBase()
+  const { base, key, model } = await openAIBase()
   const headers: Record<string, string> = { 'content-type': 'application/json' }
-  if (!local && key) headers.authorization = `Bearer ${key}`
+  if (key) headers.authorization = `Bearer ${key}`
   const res = await fetch(`${base}/chat/completions`, {
     method: 'POST',
     headers,

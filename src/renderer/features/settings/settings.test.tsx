@@ -60,7 +60,7 @@ describe('screens render', () => {
       profile: ['Time zone', 'Open USER.md'],
       agent: ['Saved to IDENTITY.md', 'Saved to agent/avatar.png', 'Choose…', 'Open SOUL.md', 'Open MEMORY.md',
         'Bring your memory from ChatGPT or Claude Code', 'Copy and open ChatGPT', 'Claude Code', '2. Paste its answer', 'Import'],
-      models: ['Answer with', 'Claude Code', 'Claude Opus', 'Stored in your Keychain', 'Endpoint', 'On-device'],
+      models: ['Answer with', 'Claude Code', 'Claude Opus', 'Stored in your Keychain', 'LM Studio server', 'On-device'],
       connections: ['Google', 'you@example.com', 'Reconnect', 'Add another Google account', 'Connect GitHub', 'Connect Linear',
         'Message me first', '8:00 AM', 'Meeting prep', 'Last check', 'Check now', 'Project API key'],
       tools: ['Writes outside the workspace', 'Always ask', 'Sending, scheduling, changing and deleting always ask first', 'New MCP Server'],

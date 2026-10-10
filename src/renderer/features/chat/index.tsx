@@ -27,6 +27,11 @@ export function ChatScreen() {
 
   useEffect(() => sync(state.chats, upsertChat, (working) => patch({ working })), [state.chats, upsertChat, patch])
   useEffect(() => setRenaming(false), [chat?.id])
+  // On LM Studio the model menu lists what it has downloaded.
+  const [lmModels, setLmModels] = useState<string[]>([])
+  useEffect(() => {
+    if (settings.provider === 'LM Studio') window.bridle.lmStudio.models().then((ms) => setLmModels(ms.map((m) => m.id)), () => setLmModels([]))
+  }, [settings.provider])
 
   // "Ask about this file" (Files) hands its file to the composer.
   useEffect(() => {
@@ -129,6 +134,7 @@ export function ChatScreen() {
   const working = !!chat && state.working.includes(chat.id)
   const centered = !chat
   const model = modelChoice(settings)
+  if (settings.provider === 'LM Studio' && lmModels.length) model.models = lmModels
   return (
     <div ref={screen} className={s.screen} onDragOver={(e) => e.dataTransfer.types.includes('Files') && e.preventDefault()} onDrop={onDrop}>
       {/* HomeGlow: the new-chat page sits on a faint light rising from the bottom. */}
