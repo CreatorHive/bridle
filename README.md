@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/hero.png" alt="Bridle: Mail. Calendar. Meetings. Code. Tasks. Files. Search. And I write first." width="100%">
+  <img src="docs/images/hero123.png" alt="Bridle: Mail. Calendar. Meetings. Code. Tasks. Files. Search. And I write first." width="100%">
 </p>
 
 <h1 align="center">Bridle</h1>
