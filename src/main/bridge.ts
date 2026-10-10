@@ -1,3 +1,4 @@
+import { sep } from 'node:path'
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto'
 import { realpath } from 'node:fs/promises'
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http'
@@ -117,7 +118,7 @@ export function tailscaleAddress(): string | null {
 async function insideWorkspace(path: string): Promise<string> {
   const root = await realpath(await workspaceRoot())
   const real = await realpath(path)
-  if (!real.startsWith(root + '/')) throw new Error('Only files in the Bridle workspace.')
+  if (!real.startsWith(root + sep)) throw new Error('Only files in the Bridle workspace.')
   return real
 }
 

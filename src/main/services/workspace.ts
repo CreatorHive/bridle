@@ -261,7 +261,7 @@ export const workspace: BridleAPI['workspace'] = {
     await mkdir(dir, { recursive: true })
     const out: string[] = []
     for (const path of paths) {
-      if (path.startsWith(root + '/')) {
+      if (path.startsWith(root + sep)) {
         out.push(path)
         continue
       }

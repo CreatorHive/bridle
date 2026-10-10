@@ -1,7 +1,7 @@
 import { existsSync, statSync } from 'node:fs'
 import { copyFile, mkdir, readdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
-import { basename, dirname, join, resolve } from 'node:path'
+import { basename, dirname, join, resolve, sep } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import type { ChangedFile, DiffHunk, DirEntry, GitHubRepo, Space, Workspace } from '../../shared/types'
 import { iso } from '../services/util'
@@ -252,7 +252,7 @@ export async function diff(w: Workspace, path: string): Promise<DiffHunk[]> {
 /** A file back as it was at the merge-base, deleted if it didn't exist there. */
 export async function revert(w: Workspace, path: string): Promise<void> {
   const full = resolve(w.path, path)
-  if (!full.startsWith(w.path + '/')) throw new Error(`${path} isn't in this workspace.`) // it may delete
+  if (!full.startsWith(w.path + sep)) throw new Error(`${path} isn't in this workspace.`) // it may delete
   const mb = await mergeBase(w.path, w.base)
   if ((await git(['cat-file', '-e', `${mb}:${path}`], w.path)).ok) {
     await git(['checkout', mb, '--', path], w.path)

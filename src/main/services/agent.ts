@@ -97,7 +97,7 @@ const APP_NAMES: Record<string, string> = { GITHUB: 'GitHub', GMAIL: 'Gmail', GO
 
 /** What a permission card says for a tool call. */
 export function describe(tool: string, input: Input, root: string): { title: string; detail: string } {
-  const short = (s: string): string => s.split(root + '/').join('')
+  const short = (s: string): string => s.split(root + sep).join('')
   const slugs = composioSlugs(input)
   if (tool.startsWith('mcp__composio__') && slugs.length) {
     // "GITHUB_CREATE_ISSUE" → "GitHub: create issue"
@@ -138,7 +138,7 @@ export function label(name: string): string {
 
 export function trace(name: string, input: Input, root: string): string {
   const detail = ['file_path', 'pattern', 'command', 'query', 'url', 'description', 'path'].map((k) => input[k]).find((v) => typeof v === 'string') as string | undefined
-  const short = (detail ?? '').split(root + '/').join('')
+  const short = (detail ?? '').split(root + sep).join('')
   return `${name.toLowerCase()} ${short.length > 80 ? short.slice(0, 79) + '…' : short}`
 }
 
