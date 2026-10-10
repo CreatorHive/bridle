@@ -1,6 +1,6 @@
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
 import { describe, expect, it, vi } from 'vitest'
 import type { Chat, TaskItem } from '../../shared/types'
 
@@ -24,7 +24,7 @@ describe('chat JSONL', () => {
     ''
   ].join('\n')
 
-  it('reads a stored chat file and writes it back byte for byte', () => {
+  it.skipIf(process.platform === 'win32')('reads a stored chat file and writes it back byte for byte', () => {
     const chat = decodeChat(swiftFile) as Chat
     expect(chat.id).toBe('E5CD3195-118D-455B-B5AA-02543553417B')
     expect(chat.sessionID).toBe('897975cf-7a42-4f8a-96a4-f12f87560edb')
@@ -101,9 +101,9 @@ describe('files and uploads', () => {
   })
 
   it('names uploads "name 2.ext" on a clash', () => {
-    const taken = new Set(['/w/f/a.pdf', '/w/f/a 2.pdf'])
-    expect(freeName('/w/f', '/src/a.pdf', (p) => taken.has(p))).toBe('/w/f/a 3.pdf')
-    expect(freeName('/w/f', '/src/b', (p) => taken.has(p))).toBe('/w/f/b')
+    const taken = new Set([join('/w/f', 'a.pdf'), join('/w/f', 'a 2.pdf')])
+    expect(freeName('/w/f', '/src/a.pdf', (p) => taken.has(p))).toBe(join('/w/f', 'a 3.pdf'))
+    expect(freeName('/w/f', '/src/b', (p) => taken.has(p))).toBe(join('/w/f', 'b'))
   })
 })
 
@@ -293,9 +293,9 @@ describe('settings and keys', () => {
 
 describe('within', () => {
   it('keeps Drive folders inside the workspace', () => {
-    expect(within('/w', 'drive/a')).toBe('/w/drive/a')
-    expect(within('/w', '/w/drive')).toBe('/w/drive')
-    expect(() => within('/w', '../etc')).toThrow()
-    expect(() => within('/w', '/wx/drive')).toThrow()
+    expect(within(resolve('/w'), 'drive/a')).toBe(resolve('/w/drive/a'))
+    expect(within(resolve('/w'), '/w/drive')).toBe(resolve('/w/drive'))
+    expect(() => within(resolve('/w'), '../etc')).toThrow()
+    expect(() => within(resolve('/w'), '/wx/drive')).toThrow()
   })
 })

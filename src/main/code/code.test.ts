@@ -2,6 +2,7 @@ import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { describe, expect, it, vi } from 'vitest'
 import type { Chat, Message } from '../../shared/types'
 
@@ -52,7 +53,7 @@ describe('names (workspace cities, repo slugs)', () => {
 })
 
 describe('space.json and workspace.json', () => {
-  it('reads a stored space with a file URL root', () => {
+  it.skipIf(process.platform === 'win32')('reads a stored space with a file URL root', () => {
     const s = decodeSpace(JSON.parse('{"allowedCommands":["Bash(npm test:*)"],"engine":"claude","name":"lcb","root":"file:///Users/me/code/lcb%20x/","slug":"lcb","trusted":true}'))
     expect(s).toEqual({ slug: 'lcb', name: 'lcb', root: '/Users/me/code/lcb x', trusted: true, allowedCommands: ['Bash(npm test:*)'], engine: 'claude', setupScript: null })
   })
@@ -64,7 +65,7 @@ describe('worktrees (create / refresh / diff / revert / archive)', () => {
     const space = await addSpace(repo)
     expect(await addSpace(join(repo, 'a.txt'))).toEqual(space) // a file adds its folder, once
     const saved = JSON.parse(readFileSync(join(ws, 'spaces', space.slug, 'space.json'), 'utf8'))
-    expect(saved.root).toBe('file://' + repo)
+    expect(saved.root).toBe(pathToFileURL(repo).href)
 
     const w = await createWorkspace(space)
     expect(CITIES).toContain(w.name)
@@ -74,7 +75,7 @@ describe('worktrees (create / refresh / diff / revert / archive)', () => {
     expect(sh(w.path, 'branch', '--show-current').trim()).toBe(w.branch)
     expect(readFileSync(join(w.path, '.env'), 'utf8')).toBe('SECRET=1\n') // gitignored .env* copied in
     const record = JSON.parse(readFileSync(join(ws, 'spaces', space.slug, 'workspaces', w.name, 'workspace.json'), 'utf8'))
-    expect(record).toMatchObject({ repo: space.slug, name: w.name, branch: w.branch, base: 'main', title: 'New workspace', path: 'file://' + w.path })
+    expect(record).toMatchObject({ repo: space.slug, name: w.name, branch: w.branch, base: 'main', title: 'New workspace', path: pathToFileURL(w.path).href })
     expect((await loadWorkspaces()).map((x) => x.id)).toContain(w.id)
 
     // A second one never reuses the name or branch.
@@ -317,7 +318,7 @@ describe('dev tools (run / stop, setup script)', () => {
     expect(state.exitCode).toBe(3)
   })
 
-  it('runs the setup script in the worktree with BRIDLE_ROOT_PATH', async () => {
+  it.skipIf(process.platform === 'win32')('runs the setup script in the worktree with BRIDLE_ROOT_PATH', async () => {
     const root = realpathSync(mkdtempSync(join(tmpdir(), 'bridle-code-setup-root-')))
     const path = realpathSync(mkdtempSync(join(tmpdir(), 'bridle-code-setup-wt-')))
     mkdirSync(join(root, '.bridle'))

@@ -166,7 +166,7 @@ export function fileKind(name: string): FileKind {
 
 /** Bridle's own file: inside a system folder, a persona/project file, or any .jsonl. `rel` is workspace-relative. */
 export function isSystem(rel: string): boolean {
-  const parts = rel.split(sep).filter(Boolean)
+  const parts = rel.split(/[\\/]/).filter(Boolean)
   const name = parts[parts.length - 1] ?? ''
   return parts.some((p) => SYSTEM_DIRS.has(p)) || SYSTEM_NAMES.has(name) || extname(name) === '.jsonl'
 }

@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { existsSync, readdirSync, readFileSync, realpathSync } from 'node:fs'
 import { rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { basename, dirname, join, resolve } from 'node:path'
+import { basename, dirname, join, resolve, sep } from 'node:path'
 import { createInterface } from 'node:readline'
 import type { BridleAPI } from '../../shared/api'
 import type { AgentAction, AgentEvent, ApprovalPolicy, Message, TaskStatus } from '../../shared/types'
@@ -56,7 +56,7 @@ export function alwaysAsk(tool: string, input: Input, folders: string[]): boolea
   const path = input.file_path ?? input.notebook_path
   if (FILE_TOOLS.includes(tool) && typeof path === 'string') {
     const file = resolve(path)
-    return !folders.some((f) => file.startsWith(resolve(f) + '/'))
+    return !folders.some((f) => file.startsWith(resolve(f) + sep))
   }
   return false
 }
@@ -86,10 +86,10 @@ function real(path: string): string {
 export function workspaceEdit(tool: string, input: Input, root: string): string | null {
   const path = input.file_path ?? input.notebook_path
   if (!FILE_TOOLS.includes(tool) || typeof path !== 'string') return null
-  const base = real(root) + '/'
+  const base = real(root) + sep
   const target = real(resolve(root, path))
   if (!target.startsWith(base)) return null
-  const file = target.slice(base.length)
+  const file = target.slice(base.length).split(sep).join('/') // "memory/today.md" on Windows too
   return !file || file.startsWith('.bridle/') ? null : file
 }
 

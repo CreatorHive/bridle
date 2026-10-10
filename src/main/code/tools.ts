@@ -45,8 +45,10 @@ function append(t: Tools, kind: 'setup' | 'run', text: string, reset = false): v
 /** The setup script: Space.setupScript, else the repo's .bridle/setup.sh (in the worktree or the main checkout). */
 export function setupScript(space: Space, w: Workspace): string | null {
   if (space.setupScript?.trim()) return space.setupScript
-  return existsSync(join(space.root, '.bridle/setup.sh')) || existsSync(join(w.path, '.bridle/setup.sh'))
-    ? 'zsh "$BRIDLE_ROOT_PATH/.bridle/setup.sh"' : null
+  // The repo's own script: .bridle/setup.sh, or .bridle/setup.ps1 on Windows.
+  const file = isWindows ? '.bridle/setup.ps1' : '.bridle/setup.sh'
+  if (!existsSync(join(space.root, file)) && !existsSync(join(w.path, file))) return null
+  return isWindows ? '& "$env:BRIDLE_ROOT_PATH/.bridle/setup.ps1"' : 'zsh "$BRIDLE_ROOT_PATH/.bridle/setup.sh"'
 }
 
 /** Whether a new workspace runs setup by itself: your own setupScript always, the repo's .bridle/setup.sh only once
