@@ -483,7 +483,7 @@ export interface Settings {
   soundVolume: number
   /** A soft key tick while a reply streams in. */
   soundStreaming: boolean
-  /** The section sidebar folded away (titlebar toggle, ⌘\\). */
+  /** The section sidebar folded away (titlebar toggle, ⌘\). */
   sidebarHidden: boolean
   autoIndex: boolean
   notifyApprovals: boolean

@@ -45,7 +45,10 @@
 .sidebar {
   flex: none; width: 260px; display: flex; flex-direction: column; min-height: 0;
   background: var(--sidebar); border-right: 1px solid rgba(223, 224, 226, 0.7);
+  transition: margin-left var(--dur-send) var(--ease-send), opacity var(--dur-send) var(--ease-send);
 }
+/* Hidden: slides out past the panel's left edge (the panel clips it) while the content widens into the room. */
+.sidebar-hidden .sidebar { margin-left: -261px; opacity: 0; }
 .sidebar-head { display: flex; align-items: center; gap: 8px; padding: 14px 16px 0; }
 .sidebar-head img { width: 26px; height: 26px; }
 .sidebar-head span { flex: 1; font-size: var(--fs-17); font-weight: 600; }

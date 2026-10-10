@@ -75,7 +75,7 @@ function Shell() {
     else setSetting('soundMuted', c.muted)
   }), [setSetting])
 
-  // ⌘, opens Settings; ⌘\\ shows or hides the sidebar.
+  // ⌘, opens Settings; ⌘\ shows or hides the sidebar.
   const sidebarHidden = !!state.settings?.sidebarHidden
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -101,8 +101,8 @@ function Shell() {
       {state.section === 'code' ? <CodeTitleBar /> : <TitleBar title={title} />}
       <div className="app-body">
         <Rail />
-        <div className="panel">
-          {!sidebarHidden && <Sidebar />}
+        <div className={`panel ${sidebarHidden ? 'sidebar-hidden' : ''}`}>
+          <Sidebar />
           <main className="content">
             {state.section === 'chat' && <ChatScreen />}
             {state.section === 'board' && <TasksBoard />}

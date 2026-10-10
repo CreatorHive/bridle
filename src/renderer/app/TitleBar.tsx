@@ -3,7 +3,7 @@ import { Button } from '../components'
 import { play } from '../sound'
 import { useApp } from './store'
 
-/** Shows or hides the section sidebar; ⌘\\ does the same (Shell). */
+/** Shows or hides the section sidebar; ⌘\ does the same (Shell). */
 export function toggleSidebar(hidden: boolean, setSetting: ReturnType<typeof useApp>['setSetting']): void {
   play('toggle', { direction: hidden ? 1 : -1 })
   setSetting('sidebarHidden', !hidden)

@@ -31,7 +31,8 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="sidebar">
+    // Folded away (⌘\) it slides out (app.css .sidebar-hidden) and takes no focus (React 18 doesn't type `inert`).
+    <aside className="sidebar" {...(state.settings?.sidebarHidden ? { inert: '' } : {})}>
       <div className="sidebar-head">
         <img src={logos.bridle} alt="" />
         <span>Bridle</span>
