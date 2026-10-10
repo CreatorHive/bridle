@@ -92,6 +92,12 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+/* macOS: the window's vibrancy (src/main/index.ts) frosts the desktop behind the chrome and sidebar; content stays opaque. */
+[data-platform='mac'] {
+  --chrome: rgba(237, 237, 238, 0.5);
+  --sidebar: linear-gradient(to bottom, rgba(246, 246, 247, 0.55), rgba(250, 250, 250, 0.65));
+}
+
 html, body, #root {
   margin: 0;
   height: 100%;
