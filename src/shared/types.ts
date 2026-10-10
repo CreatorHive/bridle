@@ -82,7 +82,22 @@ export interface Message {
   todos?: Todo[] | null
   subagents?: Subagent[] | null
   ended?: ISODate | null
+  /** The tool calls behind `trace` lines (`step` is the line's index), so a line opens to what it sent and got back. */
+  calls?: ToolCall[] | null
 }
+
+/** One tool call, its input and result as text, each capped at CALL_TEXT_LIMIT characters. */
+export interface ToolCall {
+  /** The CLI's tool_use id. */
+  id: string
+  step: number
+  tool: string
+  input: string
+  result?: string | null
+  error?: boolean | null
+}
+
+export const CALL_TEXT_LIMIT = 4000
 
 /**
  * On disk: chats/<id lowercased>.jsonl, or goals/<slug>/chats/<id>.jsonl for a
@@ -402,7 +417,8 @@ export interface PermissionRequest {
 export type AgentEvent =
   | { type: 'session'; session: string }
   | { type: 'status'; status: string }
-  | { type: 'trace'; line: string }
+  | { type: 'trace'; line: string; call?: { id: string; tool: string; input: string } }
+  | { type: 'result'; id: string; result: string; error: boolean }
   | { type: 'worker'; worker: string }
   | { type: 'text'; text: string }
   | { type: 'permission'; request: PermissionRequest }

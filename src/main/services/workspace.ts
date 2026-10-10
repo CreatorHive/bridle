@@ -37,7 +37,7 @@ export function swiftUUID(id: string): string {
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-5${h.slice(13, 16)}-a${h.slice(17, 20)}-${h.slice(20, 32)}`.toUpperCase()
 }
 
-const OPTIONAL_KEYS = ['title', 'icon', 'confirm', 'action', 'approved', 'dismissed', 'source', 'changes', 'plan', 'todos', 'subagents'] as const
+const OPTIONAL_KEYS = ['title', 'icon', 'confirm', 'action', 'approved', 'dismissed', 'source', 'changes', 'plan', 'todos', 'subagents', 'calls'] as const
 
 /** One turn as a JSONL line. Live-only `workers`/`status` are never written. */
 export function encodeTurn(m: Message): string {

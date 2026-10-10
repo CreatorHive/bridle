@@ -7,6 +7,7 @@ import { basename, dirname, join, resolve, sep } from 'node:path'
 import { createInterface } from 'node:readline'
 import type { BridleAPI } from '../../shared/api'
 import type { AgentAction, AgentEvent, ApprovalPolicy, Message, TaskStatus } from '../../shared/types'
+import { CALL_TEXT_LIMIT } from '../../shared/types'
 import { emit } from '../events'
 import { LOOP_SCRIPT } from '../automations'
 import { noteRun } from '../notch'
@@ -141,9 +142,29 @@ export function label(name: string): string {
 }
 
 export function trace(name: string, input: Input, root: string): string {
+  // MCP tools read as "server tool"; Composio's multi-execute names the app tools it ran.
+  const mcp = /^mcp__(.+?)__(.+)$/.exec(name)
+  if (mcp) {
+    const slugs = Array.isArray(input.tools) ? (input.tools as Input[]).map((t) => t?.tool_slug).filter((t): t is string => typeof t === 'string') : []
+    return `${mcp[1]} ${(slugs.length ? slugs.join(', ') : mcp[2]).toLowerCase()}`
+  }
   const detail = ['file_path', 'pattern', 'command', 'query', 'url', 'description', 'path'].map((k) => input[k]).find((v) => typeof v === 'string') as string | undefined
   const short = unroot(detail ?? '', root)
   return `${name.toLowerCase()} ${short.length > 80 ? short.slice(0, 79) + '…' : short}`
+}
+
+const cap = (text: string): string => (text.length > CALL_TEXT_LIMIT ? text.slice(0, CALL_TEXT_LIMIT) + '\n…' : text)
+
+/** A tool_result's content: a string, or text blocks (images are skipped). JSON comes back indented. */
+export function resultText(content: unknown): string {
+  const text = typeof content === 'string' ? content
+    : Array.isArray(content) ? content.map((c) => (c?.type === 'text' && typeof c.text === 'string' ? c.text : c?.type === 'image' ? '[image]' : '')).join('\n')
+    : ''
+  try {
+    return JSON.stringify(JSON.parse(text), null, 2)
+  } catch {
+    return text
+  }
 }
 
 // MARK: The system prompt
@@ -368,7 +389,16 @@ async function claudeCLI(chatId: string, state: RunState, prompt: string, sessio
           // In a Code turn a subagent's own calls go to its row instead (parent_tool_use_id).
           if (codeRun?.onLine && typeof event.parent_tool_use_id === 'string') break
           for (const b of (event.message?.content ?? []) as Record<string, any>[]) {
-            if (b.type === 'tool_use') send({ type: 'trace', line: trace(b.name ?? 'tool', b.input ?? {}, codeRun?.cwd ?? root) })
+            if (b.type === 'tool_use') send({
+              type: 'trace', line: trace(b.name ?? 'tool', b.input ?? {}, codeRun?.cwd ?? root),
+              call: typeof b.id === 'string' ? { id: b.id, tool: b.name ?? 'tool', input: cap(JSON.stringify(b.input ?? {}, null, 2)) } : undefined
+            })
+          }
+          break
+        }
+        case 'user': {
+          for (const b of (event.message?.content ?? []) as Record<string, any>[]) {
+            if (b.type === 'tool_result' && typeof b.tool_use_id === 'string') send({ type: 'result', id: b.tool_use_id, result: cap(resultText(b.content)), error: b.is_error === true })
           }
           break
         }

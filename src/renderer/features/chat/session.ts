@@ -138,7 +138,11 @@ async function reply(o: SendOptions, id: string, prompt: string): Promise<void> 
     switch (event.type) {
       case 'session': return editChat(chatId, (c) => ({ ...c, sessionID: event.session }))
       case 'status': return update((m) => (m.text ? {} : { status: event.status }))
-      case 'trace': return update((m) => ({ trace: [...(m.trace ?? []), event.line] }))
+      case 'trace': return update((m) => ({
+        trace: [...(m.trace ?? []), event.line],
+        ...(event.call ? { calls: [...(m.calls ?? []), { ...event.call, step: m.trace?.length ?? 0 }] } : {})
+      }))
+      case 'result': return update((m) => ({ calls: m.calls?.map((c) => (c.id === event.id ? { ...c, result: event.result, error: event.error } : c)) }))
       case 'worker': return update((m) => (m.workers?.includes(event.worker) ? {} : { workers: [...(m.workers ?? []), event.worker] }))
       case 'text': return update((m) => ({ status: null, workers: [], text: m.text + event.text }))
       case 'error': failure = event.message; return

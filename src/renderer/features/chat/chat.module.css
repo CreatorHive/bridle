@@ -78,8 +78,18 @@
 
 .trace { font-family: var(--mono); font-size: calc(12.5px * var(--zoom)); color: var(--secondary); }
 .trace { list-style: none; margin: 2px 0 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
-.trace li { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.trace li > span, .traceLink { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trace li { display: flex; flex-direction: column; min-width: 0; }
+.traceRow { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.traceRow > span, .traceLink { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.traceToggle { display: inline-flex; color: inherit; --press: 0.9; }
+.traceToggle svg { transition: transform var(--state); }
+.traceOpen svg { transform: rotate(90deg); }
+.traceCall { text-decoration-style: dotted; }
+.callDetail { display: flex; flex-direction: column; gap: 4px; margin: 6px 0 4px 18px; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--r-panel); background: var(--card); }
+.callDetail pre { margin: 0 0 6px; max-height: 240px; overflow: auto; white-space: pre-wrap; word-break: break-word; color: var(--text); font: inherit; font-size: calc(11.5px * var(--zoom)); }
+.callTool { color: var(--text); font-weight: 600; word-break: break-all; }
+.callLabel { font-family: var(--font); font-size: calc(10.5px * var(--zoom)); text-transform: uppercase; letter-spacing: 0.04em; }
+.callError { color: var(--red); }
 .traceLink { text-align: left; text-decoration: underline; text-decoration-color: var(--border); text-underline-offset: 2px; --press: 0.99; }
 .traceLink:hover { color: var(--text); }
 

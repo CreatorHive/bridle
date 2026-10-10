@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Check, ChevronRight, Copy, FileText, Volume2, X } from 'lucide-react'
-import type { Message } from '../../../shared/types'
+import type { Message, ToolCall } from '../../../shared/types'
 import { Avatar, Button, ShimmerText, StreamingMarkdown, Swap } from '../../components'
 import { play } from '../../sound'
 import { basename, extractActions, isImage, traceTarget, absolutePath } from './logic'
@@ -98,7 +98,7 @@ function AgentMessage({ message, agentName, fresh, live }: { message: Message; a
             {/* An action block streams in as raw JSON; hide it until it becomes a card. A reply that
                 arrives while you watch fades in character by character from its first chunk. */}
             <StreamingMarkdown text={extractActions(message.text).text} fromStart={live} />
-            {trace.length > 0 && <Trace trace={trace} />}
+            {trace.length > 0 && <Trace trace={trace} calls={message.calls ?? []} />}
             <div className={s.actions}>
               <Button cue={null} className={s.actionButton} title="Copy" aria-label="Copy" onClick={() => {
                 void navigator.clipboard.writeText(message.text)
@@ -124,9 +124,11 @@ function speak(text: string) {
   speechSynthesis.speak(new SpeechSynthesisUtterance(text.replaceAll('_', '')))
 }
 
-/** What the agent did, one line per step (12.5pt mono). A step naming a file that exists opens it (no cue). */
-function Trace({ trace }: { trace: string[] }) {
+/** What the agent did, one line per step (12.5pt mono). A step naming a file that exists opens it (no cue);
+ *  a step with a recorded tool call opens to what it sent and got back. */
+function Trace({ trace, calls }: { trace: string[]; calls: ToolCall[] }) {
   const [found, setFound] = useState<Set<string>>(new Set())
+  const [shown, setShown] = useState<number | null>(null)
   const key = trace.join('\n')
   useEffect(() => {
     let live = true
@@ -140,16 +142,41 @@ function Trace({ trace }: { trace: string[] }) {
     <ul className={s.trace}>
       {trace.map((step, i) => {
         const path = traceTarget(step)
+        const call = calls.find((c) => c.step === i)
+        const toggle = () => setShown(shown === i ? null : i)
         return (
           <li key={i}>
-            <ChevronRight size={10} strokeWidth={3} />
-            {path && found.has(path) ? (
-              <Button cue={null} className={s.traceLink} title={`Open ${path}`} onClick={() => open(path)}>{step}</Button>
-            ) : <span>{step}</span>}
+            <div className={s.traceRow}>
+              {call ? (
+                <Button cue={null} className={`${s.traceToggle} ${shown === i ? s.traceOpen : ''}`} aria-expanded={shown === i}
+                  aria-label={shown === i ? 'Hide details' : 'Show details'} onClick={toggle}>
+                  <ChevronRight size={10} strokeWidth={3} />
+                </Button>
+              ) : <ChevronRight size={10} strokeWidth={3} />}
+              {path && found.has(path) ? (
+                <Button cue={null} className={s.traceLink} title={`Open ${path}`} onClick={() => open(path)}>{step}</Button>
+              ) : call ? (
+                <Button cue={null} className={`${s.traceLink} ${s.traceCall}`} title={call.tool} onClick={toggle}>{step}</Button>
+              ) : <span>{step}</span>}
+            </div>
+            {call && shown === i && <CallDetail call={call} />}
           </li>
         )
       })}
     </ul>
+  )
+}
+
+/** A tool call opened from the trace: its full name, what it was given, and what came back. */
+function CallDetail({ call }: { call: ToolCall }) {
+  return (
+    <div className={s.callDetail}>
+      <span className={s.callTool}>{call.tool}</span>
+      <span className={s.callLabel}>Input</span>
+      <pre>{call.input}</pre>
+      <span className={`${s.callLabel} ${call.error ? s.callError : ''}`}>{call.error ? 'Error' : 'Result'}</span>
+      <pre>{call.result ?? (call.result === undefined ? 'Waiting…' : '')}</pre>
+    </div>
   )
 }
 

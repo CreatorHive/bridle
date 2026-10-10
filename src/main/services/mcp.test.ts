@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('electron', () => ({ app: {}, shell: {}, dialog: {}, BrowserWindow: { getAllWindows: () => [] } }))
 const { parseServers } = await import('./mcp')
-const { describe: describeTool } = await import('./agent')
+const { describe: describeTool, trace, resultText } = await import('./agent')
 
 describe('mcp', () => {
   it('takes one server, a map, or a whole mcpServers block', () => {
@@ -16,5 +16,20 @@ describe('mcp', () => {
 
   it('names MCP calls on permission cards', () => {
     expect(describeTool('mcp__context7__query-docs', {}, '/w').title).toBe('Use context7: query-docs?')
+  })
+})
+
+describe('tool calls in the trace', () => {
+  it('names MCP tools by server, and the app tools Composio ran', () => {
+    expect(trace('mcp__composio__COMPOSIO_MULTI_EXECUTE_TOOL', { tools: [{ tool_slug: 'GMAIL_FETCH_EMAILS' }, { tool_slug: 'GMAIL_GET_PROFILE' }] }, '/r'))
+      .toBe('composio gmail_fetch_emails, gmail_get_profile')
+    expect(trace('mcp__docs__search', {}, '/r')).toBe('docs search')
+    expect(trace('Read', { file_path: '/r/notes/x.md' }, '/r')).toBe('read notes/x.md')
+  })
+
+  it('reads a tool result as text, JSON indented', () => {
+    expect(resultText('{"a":1}')).toBe('{\n  "a": 1\n}')
+    expect(resultText([{ type: 'text', text: 'hi' }, { type: 'image' }])).toBe('hi\n[image]')
+    expect(resultText(undefined)).toBe('')
   })
 })
