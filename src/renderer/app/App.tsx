@@ -1,6 +1,7 @@
 import { Component, useEffect, type ErrorInfo, type ReactNode } from 'react'
 import { CalendarScreen } from '../features/calendar'
 import { ChatScreen } from '../features/chat'
+import { SideChat } from '../features/chat/SideChat'
 import { CodeScreen } from '../features/code'
 import { FilesScreen } from '../features/files'
 import { MailScreen } from '../features/mail'
@@ -21,7 +22,7 @@ import './app.css'
 
 /** main.tsx's route: the onboarding window (src/main/onboarding.ts) loads `#onboarding` and gets only Onboarding. */
 export function Root({ hash, initialState }: { hash: string; initialState?: Partial<AppState> }) {
-  if (hash === '#side') return <SideChat initialState={initialState} />
+  if (hash === '#side') return <SideRoute initialState={initialState} />
   if (hash !== '#onboarding') return <App initialState={initialState} />
   return (
     <AppProvider initialState={initialState}>
@@ -30,9 +31,10 @@ export function Root({ hash, initialState }: { hash: string; initialState?: Part
   )
 }
 
-/** The side chat window (src/main/sidechat.ts): a fresh chat and nothing else; Esc closes it. */
-function SideChat({ initialState }: { initialState?: Partial<AppState> }) {
+/** The side chat window (src/main/sidechat.ts): a see-through bar over the Dock; Esc closes it. */
+function SideRoute({ initialState }: { initialState?: Partial<AppState> }) {
   useEffect(() => {
+    document.documentElement.dataset.route = 'side' // a transparent page (app.css)
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && !e.defaultPrevented) window.close()
     }
@@ -42,10 +44,7 @@ function SideChat({ initialState }: { initialState?: Partial<AppState> }) {
   return (
     <AppProvider initialState={{ section: 'chat', chatId: null, ...initialState }}>
       <Guard>
-        <div className="side-chat">
-          <div className="side-chat-head">Bridle</div>
-          <main className="content"><ChatScreen /></main>
-        </div>
+        <SideChat />
       </Guard>
     </AppProvider>
   )

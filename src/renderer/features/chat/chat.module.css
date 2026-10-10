@@ -232,3 +232,17 @@
   padding: 10px; border-radius: 10px; background: rgba(241, 241, 241, 0.6);
   font-family: var(--mono); font-size: calc(12.5px * var(--zoom)); white-space: pre-wrap; overflow-wrap: anywhere; user-select: text;
 }
+
+/* SideChat: a see-through bar above the Dock. The window is transparent; only the composer, and the glass panel
+   with the conversation once there is one, are drawn. */
+.side { height: 100vh; display: flex; flex-direction: column; justify-content: flex-end; gap: 10px; padding: 12px 14px 14px; box-sizing: border-box; }
+.sidePanel {
+  flex: 1; min-height: 0; display: flex; flex-direction: column; border-radius: 24px; overflow: hidden;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.12), 0 18px 50px rgba(0, 0, 0, 0.22);
+  animation: fade var(--dur-settle) var(--ease-settle);
+}
+.sidePanel .transcript { padding: 18px 20px; gap: 18px; }
+.sidePanel .user { padding-left: 48px; }
+.sideComposer { flex: none; }
+.sideComposer .composer { background: rgba(255, 255, 255, 0.9); box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.12), 0 12px 36px rgba(0, 0, 0, 0.24); }

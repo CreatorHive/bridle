@@ -118,9 +118,5 @@
 @keyframes modal-in { from { opacity: 0; transform: scale(0.85); filter: blur(8px); } }
 @keyframes modal-out { to { opacity: 0; transform: scale(0.85); filter: blur(8px); } }
 
-/* Side chat (#side): a drag strip over the chat. */
-.side-chat { height: 100vh; display: flex; flex-direction: column; background: var(--content); }
-.side-chat-head {
-  flex: none; height: 32px; display: grid; place-items: center; -webkit-app-region: drag; user-select: none;
-  font-size: var(--fs-12); font-weight: 600; color: var(--tertiary); border-bottom: 1px solid var(--separator);
-}
+/* Side chat (#side): the page is transparent; SideChat draws the bar and the panel. */
+[data-route='side'], [data-route='side'] body { background: transparent; }

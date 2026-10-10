@@ -1,6 +1,7 @@
 import { ipcMain, shell as electronShell } from 'electron'
 import { API_METHODS, channel, type GroupName, type InvokeAPI } from '../shared/api'
 import { automations } from './automations'
+import { sideChat } from './sidechat'
 import { phone, startBridge } from './bridge'
 import { code } from './code'
 import { banner } from './events'
@@ -44,7 +45,7 @@ const about: InvokeAPI['about'] = {
 }
 
 /** Every contract group, implemented. Typed against BridleAPI, so a missing method fails typecheck. */
-const services: InvokeAPI = { workspace, settings, keychain, composio, gmail, calendar, tasks, automations, mcp, agent, watcher, away, notify, search, viewer, memory, avatar, about, code, native, shell, onboarding, phone }
+const services: InvokeAPI = { workspace, settings, keychain, composio, gmail, calendar, tasks, automations, mcp, side: sideChat, agent, watcher, away, notify, search, viewer, memory, avatar, about, code, native, shell, onboarding, phone }
 
 /** One ipcMain.handle per method in API_METHODS: "<group>:<method>" → services[group][method](...args). */
 export function registerIpc(): void {

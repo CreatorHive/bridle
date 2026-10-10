@@ -152,6 +152,12 @@ export interface BridleAPI {
     run(id: string): Promise<void>
   }
 
+  /** The side chat window (src/main/sidechat.ts). */
+  side: {
+    /** Grows the bar upward from the Dock to `height` px, or back to just the composer with 0. */
+    resize(height: number): Promise<void>
+  }
+
   /** Your MCP servers (.bridle/mcp.json), given to the Claude CLI with Composio's. */
   mcp: {
     list(): Promise<McpServer[]>
@@ -445,6 +451,7 @@ export const API_METHODS: { [G in GroupName]: { [M in keyof InvokeAPI[G]]: true 
     sendToLinear: true, syncLinear: true, linearDetail: true, run: true
   },
   mcp: { list: true, add: true, remove: true, set: true },
+  side: { resize: true },
   automations: { routines: true, loops: true, setEnabled: true, approve: true, runNow: true },
   agent: { run: true, respondPermission: true, cancel: true, perform: true, chatTitle: true },
   watcher: { status: true, checkNow: true, briefNow: true, prepNote: true, savedPrep: true, homeChatId: true },
