@@ -25,9 +25,9 @@ function createWindow(): BrowserWindow {
     show: false,
     // macOS: traffic lights inset into the 38px chrome strip. Windows/Linux: the system buttons drawn over it.
     ...(process.platform === 'darwin'
-      // Frosted glass: the sidebar material shows through the chrome and sidebar's translucent tokens ([data-platform='mac']).
-      ? { titleBarStyle: 'hiddenInset' as const, trafficLightPosition: { x: 14, y: 13 }, vibrancy: 'sidebar' as const,
-          backgroundColor: '#00000000' }
+      // Frosted glass, focused or not, through the chrome and sidebar's translucent tokens ([data-platform='mac']).
+      ? { titleBarStyle: 'hiddenInset' as const, trafficLightPosition: { x: 14, y: 13 },
+          vibrancy: 'sidebar' as const, visualEffectState: 'active' as const, backgroundColor: '#00000000' }
       : { titleBarStyle: 'hidden' as const, titleBarOverlay: { color: '#EDEDEE', symbolColor: '#1A1B1E', height: 38 },
           backgroundColor: '#EDEDEE' }),
     icon, // Linux/Windows; macOS takes the Dock icon below
