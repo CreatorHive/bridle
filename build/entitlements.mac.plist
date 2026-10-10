@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- V8's JIT under the Hardened Runtime (electron-builder's default, kept since this file replaces it). -->
+  <key>com.apple.security.cs.allow-jit</key>
+  <true/>
+  <!-- Dictation: bridle-helper listens to the microphone, attributed to Bridle. -->
+  <key>com.apple.security.device.audio-input</key>
+  <true/>
+</dict>
+</plist>

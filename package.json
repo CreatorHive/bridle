@@ -6,7 +6,10 @@
   "license": "MIT",
   "author": "Sean Scott <sean@sscott.dev>",
   "homepage": "https://github.com/creatorhive/bridle",
-  "repository": { "type": "git", "url": "git+https://github.com/creatorhive/bridle.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/creatorhive/bridle.git"
+  },
   "bugs": "https://github.com/creatorhive/bridle/issues",
   "main": "out/main/index.js",
   "scripts": {
@@ -16,6 +19,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
     "test": "vitest run",
     "build:native": "swift build -c release --package-path native/BridleHelper",
+    "dist": "npm run build && npm run build:native && electron-builder --mac --publish never",
     "rebuild": "electron-rebuild -f -o node-pty",
     "postinstall": "electron-rebuild -f -o node-pty || echo \"node-pty did not build for Electron: Code terminals fall back to a plain shell\""
   },
@@ -34,6 +38,7 @@
     "@types/react-dom": "18.3.5",
     "@vitejs/plugin-react": "4.3.4",
     "electron": "33.4.11",
+    "electron-builder": "26.15.3",
     "electron-vite": "2.3.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",

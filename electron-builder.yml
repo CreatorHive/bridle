@@ -1,0 +1,36 @@
+# Packaging: `npm run dist` builds a DMG in dist/. Signing uses the Developer ID in your keychain (or CSC_LINK in CI);
+# notarization runs when APPLE_ID + APPLE_APP_SPECIFIC_PASSWORD + APPLE_TEAM_ID (or APPLE_API_KEY…) are set.
+appId: com.creatorhive.bridle
+productName: Bridle
+copyright: Copyright © 2026 Sean Scott
+directories:
+  output: dist
+  buildResources: build
+files:
+  - out/**
+  - package.json
+asarUnpack:
+  - "**/node_modules/node-pty/**"
+extraResources:
+  - from: native/BridleHelper/.build/release/bridle-helper
+    to: bridle-helper
+  - from: native/BridleHelper/.build/release/bridle-notch
+    to: bridle-notch
+mac:
+  category: public.app-category.productivity
+  icon: build/icon.icns
+  target:
+    - target: dmg
+      arch: arm64
+  hardenedRuntime: true
+  entitlements: build/entitlements.mac.plist
+  extendInfo:
+    NSMicrophoneUsageDescription: Bridle listens while you dictate a message.
+    NSSpeechRecognitionUsageDescription: Bridle turns your speech into text on this Mac.
+    LSMinimumSystemVersion: "26.0"
+dmg:
+  artifactName: Bridle-${version}-${arch}.dmg
+publish:
+  provider: github
+  owner: CreatorHive
+  repo: bridle
