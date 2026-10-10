@@ -9,6 +9,13 @@
   -webkit-app-region: drag;
 }
 [data-platform='win'] .titlebar, [data-platform='linux'] .titlebar { padding-right: 140px; }
+/* Right of the traffic lights on macOS; the left edge elsewhere (the system buttons are on the right). */
+.titlebar-toggle {
+  position: absolute; left: 84px; top: 6px; width: 28px; height: 26px; border-radius: 7px;
+  display: grid; place-items: center; color: var(--secondary); -webkit-app-region: no-drag; --press: 0.94;
+}
+.titlebar-toggle:hover { background: var(--hover); color: var(--text); }
+[data-platform='win'] .titlebar-toggle, [data-platform='linux'] .titlebar-toggle { left: 16px; }
 .titlebar h1 {
   margin: 0; max-width: 420px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   font-size: var(--fs-13); font-weight: 600; color: var(--text);
