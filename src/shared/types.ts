@@ -481,6 +481,8 @@ export interface Settings {
   approvalPolicy: ApprovalPolicy
   soundMuted: boolean
   soundVolume: number
+  /** A soft key tick while a reply streams in. */
+  soundStreaming: boolean
   autoIndex: boolean
   notifyApprovals: boolean
   notifyDone: boolean
@@ -511,6 +513,7 @@ export const DEFAULT_SETTINGS: Settings = {
   approvalPolicy: 'Always ask',
   soundMuted: false,
   soundVolume: 0.5,
+  soundStreaming: false,
   autoIndex: true,
   notifyApprovals: true,
   notifyDone: true,
@@ -547,6 +550,9 @@ export interface FolderEntry {
   path: string
   name: string
   folder: boolean
+  /** Bytes (0 for a folder) and the ISO time it last changed. */
+  size?: number
+  modified?: string
 }
 
 /** Where imported memory comes from. */

@@ -146,8 +146,8 @@ function chatFile(root: string, chat: Chat): string {
 
 // MARK: Files screen
 
-const SYSTEM_DIRS = new Set(['chats', 'agent', 'memory', 'tasks', 'notes', 'spaces', '.bridle'])
-const SYSTEM_NAMES = new Set(['GOAL.md', 'BOARD.md', 'SOURCES.md', 'AGENTS.md', 'SOUL.md', 'IDENTITY.md', 'USER.md', 'TOOLS.md', 'MEMORY.md', 'HEARTBEAT.md'])
+const SYSTEM_DIRS = new Set(['chats', 'agent', 'agents', 'memory', 'dreams', 'prompts', 'routines', 'loops', 'meetings', 'tasks', 'notes', 'spaces', '.bridle'])
+const SYSTEM_NAMES = new Set(['GOAL.md', 'BOARD.md', 'SOURCES.md', 'AGENTS.md', 'SOUL.md', 'IDENTITY.md', 'USER.md', 'TOOLS.md', 'MEMORY.md', 'HEARTBEAT.md', 'BOOT.md'])
 const SKIP_DIRS = new Set(['node_modules', '.git', 'worktrees'])
 /** Finder packages (`.skipsPackageDescendants`): neither listed nor walked. */
 const PACKAGES = new Set(['app', 'bundle', 'framework', 'pages', 'key', 'numbers', 'rtfd', 'photoslibrary', 'xcodeproj', 'xcworkspace'])

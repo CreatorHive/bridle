@@ -12,6 +12,9 @@ import { settings } from './services/settings'
 import { stopAll } from './services/agent'
 import { ensureWorkspace } from './services/seed'
 import { startWatcher } from './watch'
+import { openedAtLogin, startTray } from './tray'
+import { startHeartbeat } from './heartbeat'
+import { startDreams } from './dreams'
 
 function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
@@ -36,7 +39,13 @@ function createWindow(): BrowserWindow {
   })
   // Onboarding covers the screen and brings this window forward when it finishes.
   win.once('ready-to-show', () => {
-    if (!onboardingOpen()) win.show()
+    if (!onboardingOpen() && !openedAtLogin()) win.show()
+  })
+  // Closing hides: the agent keeps running (routines, loops and the watcher send through this window). Quit ends it.
+  win.on('close', (e) => {
+    if (quitting) return
+    e.preventDefault()
+    win.hide()
   })
 
   // Links never open inside the app.
@@ -57,6 +66,20 @@ app.setName('Bridle')
 
 installCrashLogging()
 
+let quitting = false
+
+/** The main window (no #hash), brought forward, or made again. */
+function showMain(): void {
+  const win = BrowserWindow.getAllWindows().find((w) => !w.isDestroyed() && !w.webContents.getURL().includes('#'))
+  if (!win) return void createWindow()
+  win.show()
+  win.focus()
+}
+
+// One Bridle at a time: a second launch brings this one forward instead of running everything twice.
+if (!app.requestSingleInstanceLock()) app.exit(0)
+app.on('second-instance', showMain)
+
 app.whenReady().then(async () => {
   if (process.platform === 'darwin') app.dock?.setIcon(nativeImage.createFromPath(icon)) // dev runs show Electron's icon otherwise
   Menu.setApplicationMenu(appMenu())
@@ -67,15 +90,19 @@ app.whenReady().then(async () => {
   createWindow()
   if (!onboarded) showOnboarding()
   startWatcher()
+  startHeartbeat()
+  startDreams()
   startNotch()
   startSideChat()
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
+  void startTray(showMain)
+  app.on('activate', showMain)
 })
 
 // Running replies end with the app.
-app.on('before-quit', stopAll)
+app.on('before-quit', () => {
+  quitting = true
+  stopAll()
+})
 app.on('will-quit', stopSideChat)
 
 app.on('window-all-closed', () => {
