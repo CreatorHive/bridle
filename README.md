@@ -88,8 +88,7 @@ it reads in mail, web pages and files is treated as data, never as instructions.
 
 Bridle is early. Expect rough edges:
 
-- Email and event cards that appear under a reply don't send yet. Sending works through the agent's Gmail and
-  Calendar tools, which ask you first.
+- Snooze in Mail stays in Bridle; Gmail's API has no snooze.
 - Routines, Loops and task runs work while Bridle is open.
 
 ## Run it

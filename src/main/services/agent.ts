@@ -12,7 +12,7 @@ import { emit } from '../events'
 import { LOOP_SCRIPT } from '../automations'
 import { noteRun } from '../notch'
 import { projectContext } from '../search/service'
-import { composio } from './composio'
+import { composio, createEvent, sendEmail } from './composio'
 import { cliServers, recordMcpStatus, trustedMcp } from './mcp'
 import { claudeBinary, complete, openAIBase } from './llm'
 import { lmStudioRun } from './lmstudio'
@@ -537,7 +537,7 @@ async function mock(state: RunState, send: Send): Promise<void> {
   const reply = `_(mock)_ Here's where a real answer streams in. I can also send Alex a quick update — approve it below.
 
 \`\`\`bridle:email
-{"to": "Alex Carter <alex@carta.dev>", "subject": "Bridle launch status", "body": "Hey Alex — quick update on the Bridle launch. Onboarding polish and semantic search are both in progress. Docs site is still to do. I'll keep you posted as things move forward."}
+{"to": "Alex Carter <alex@example.com>", "subject": "Bridle launch status", "body": "Hey Alex — quick update on the Bridle launch. Onboarding polish and semantic search are both in progress. Docs site is still to do. I'll keep you posted as things move forward."}
 \`\`\``
   for (const word of reply.split(' ')) {
     send({ type: 'text', text: word + ' ' })
@@ -640,7 +640,10 @@ export const agent: BridleAPI['agent'] = {
 
   async perform(action: AgentAction) {
     if (action.kind === 'task') await addTask(action.fields)
-    else await sleep(400) // ponytail: email and event sends are still mocked
+    else if ((await settings.get('provider')) === 'Mock') await sleep(400) // the mock's canned card never really sends
+    else if (action.kind === 'email') await sendEmail(action.fields)
+    else if (action.kind === 'event') await createEvent(action.fields)
+    else throw new Error(`Bridle can't do "${action.kind}" yet`)
   },
 
   /** Names a chat after its first exchange, if it's still titled with its first message. */

@@ -462,6 +462,57 @@ export async function fetchMail(box: Mailbox, account: string, grant: string): P
   return (data.messages ?? []).map((m) => toMail(m, box, account))
 }
 
+// MARK: Approved cards (bridle:email, bridle:event)
+
+/** "Ann <a@x.com>, b@y.com" → ["a@x.com", "b@y.com"]. */
+export function addresses(list: string): string[] {
+  return list.split(/[,;]/).map((a) => parseSender(a.trim()).email).filter((a) => a.includes('@'))
+}
+
+/** A bridle:email card → GMAIL_SEND_EMAIL arguments. */
+export function emailArgs(f: Record<string, string>): Record<string, unknown> {
+  const [to, ...more] = addresses(f.to ?? '')
+  if (!to) throw new Error(`"${f.to ?? ''}" has no email address to send to`)
+  const cc = addresses(f.cc ?? '')
+  return { recipient_email: to, ...(more.length ? { extra_recipients: more } : {}), ...(cc.length ? { cc } : {}), subject: f.subject ?? '', body: f.body ?? '' }
+}
+
+/** "2026-10-10 14:00" → "2026-10-10T14:00:00"; a bare date stays a date (an all-day event). */
+const when = (s: string): string => {
+  const m = /^(\d{4}-\d{2}-\d{2})(?:[ T](\d{1,2}):(\d{2}))?/.exec(s.trim())
+  if (!m) throw new Error(`"${s}" isn't a date and time like 2026-10-10 14:00`)
+  return m[2] ? `${m[1]}T${m[2].padStart(2, '0')}:${m[3]}:00` : m[1]
+}
+
+/** A bridle:event card → GOOGLECALENDAR_CREATE_EVENT arguments, in this Mac's time zone. An hour when there's no end. */
+export function eventArgs(f: Record<string, string>, timezone = Intl.DateTimeFormat().resolvedOptions().timeZone): Record<string, unknown> {
+  if (!f.title) throw new Error('The event has no title')
+  const start = when(f.start ?? '')
+  const end = f.end ? when(f.end) : null
+  const allDay = !start.includes('T')
+  return {
+    calendar_id: 'primary', summary: f.title, timezone,
+    ...(f.notes ? { description: f.notes } : {}),
+    ...(allDay ? { start_date: start, ...(end ? { end_date: end } : {}) }
+      : { start_datetime: start, ...(end ? { end_datetime: end } : { event_duration_hour: 1, event_duration_minutes: 0 }) })
+  }
+}
+
+/** Sends an approved email from `from` (else the first Gmail account). */
+export async function sendEmail(f: Record<string, string>): Promise<void> {
+  const all = await grants('gmail')
+  const g = all.find((a) => a.login === f.from) ?? all[0]
+  if (!g) throw new Error('Connect Gmail in Settings → Connections to send email')
+  await execute('GMAIL_SEND_EMAIL', emailArgs(f), g.grant)
+}
+
+/** Adds an approved event to the primary calendar of the first Google Calendar account. */
+export async function createEvent(f: Record<string, string>): Promise<void> {
+  const g = (await grants('googlecalendar'))[0]
+  if (!g) throw new Error('Connect Google Calendar in Settings → Connections to add events')
+  await execute('GOOGLECALENDAR_CREATE_EVENT', eventArgs(f), g.grant)
+}
+
 async function gmailGrant(account: string): Promise<string> {
   const g = (await grants('gmail')).find((a) => a.login === account)
   if (!g) throw new Error(`${account} isn't connected to Gmail`)

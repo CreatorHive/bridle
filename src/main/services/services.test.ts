@@ -9,7 +9,7 @@ vi.mock('electron', () => ({ app: {}, shell: {}, dialog: {}, BrowserWindow: { ge
 
 const { decodeChat, encodeChat, encodeTurn, freeName, isSystem, projectDir, scan, slug, swiftUUID, walksInto, within } = await import('./workspace')
 const { parseTask, taskMarkdown, linearStatus, targetState, issueItem, linearDetail } = await import('./tasks')
-const { parseSender, plainText, findPart, toMail, toEvent, tidy, group, decodeEntities } = await import('./composio')
+const { parseSender, plainText, findPart, toMail, toEvent, tidy, group, decodeEntities, emailArgs, eventArgs } = await import('./composio')
 const { alwaysAsk, allows, readOnly, describe: describeTool, workspaceEdit, trace, cleanTitle, bootstrap } = await import('./agent')
 const { coerce } = await import('./settings')
 const { dotenv } = await import('./keychain')
@@ -300,5 +300,23 @@ describe('within', () => {
     expect(within(resolve('/w'), '/w/drive')).toBe(resolve('/w/drive'))
     expect(() => within(resolve('/w'), '../etc')).toThrow()
     expect(() => within(resolve('/w'), '/wx/drive')).toThrow()
+  })
+})
+
+describe('approved cards', () => {
+  it('turns an email card into Gmail send arguments', () => {
+    expect(emailArgs({ to: 'Ann Lee <ann@x.com>, bo@y.com', subject: 'Hi', body: 'Yo' }))
+      .toEqual({ recipient_email: 'ann@x.com', extra_recipients: ['bo@y.com'], subject: 'Hi', body: 'Yo' })
+    expect(() => emailArgs({ to: 'Ann', body: 'x' })).toThrow('no email address')
+  })
+
+  it('turns an event card into a Calendar event in the local time zone', () => {
+    expect(eventArgs({ title: 'Sync', start: '2026-10-10 9:30', end: '2026-10-10 10:00', notes: 'n' }, 'America/New_York')).toEqual({
+      calendar_id: 'primary', summary: 'Sync', timezone: 'America/New_York', description: 'n',
+      start_datetime: '2026-10-10T09:30:00', end_datetime: '2026-10-10T10:00:00'
+    })
+    expect(eventArgs({ title: 'Call', start: '2026-10-10 14:00' }, 'UTC')).toMatchObject({ start_datetime: '2026-10-10T14:00:00', event_duration_hour: 1 })
+    expect(eventArgs({ title: 'Trip', start: '2026-10-12' }, 'UTC')).toMatchObject({ start_date: '2026-10-12' })
+    expect(() => eventArgs({ title: 'X', start: 'tomorrow' }, 'UTC')).toThrow('like 2026-10-10 14:00')
   })
 })
