@@ -5,13 +5,13 @@
 <h1 align="center">Bridle</h1>
 
 <p align="center">
-  <strong>An open-source personal agent for macOS that lives in a folder and writes first.</strong>
+  <strong>An open-source personal agent for macOS and Linux that lives in a folder and writes first.</strong>
 </p>
 
 <p align="center">
   <a href="https://github.com/CreatorHive/bridle/actions/workflows/ci.yml"><img src="https://github.com/CreatorHive/bridle/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-205BFF" alt="MIT license"></a>
-  <img src="https://img.shields.io/badge/platform-macOS-1A1B1E" alt="macOS">
+  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux-1A1B1E" alt="macOS | Linux">
   <img src="https://img.shields.io/badge/status-early-8CBFFF" alt="Early">
 </p>
 
@@ -95,7 +95,8 @@ Bridle is early. Expect rough edges:
 
 You'll need:
 
-- macOS. The on-device features (search by meaning, OCR, transcription, dictation, the notch) need macOS 26 and Xcode 26.
+- macOS, or Linux (x64; see [On Linux](#on-linux) below). The on-device features (search by meaning, OCR, transcription,
+  dictation, the notch) need macOS 26 and Xcode 26.
 - Node.js 20 or later.
 - [Claude Code](https://claude.com/claude-code), signed in, for the default model. Or point Settings → Models at an
   OpenAI-compatible endpoint.
@@ -103,7 +104,8 @@ You'll need:
   (Settings → Connections).
 
 **Download:** the latest signed and notarized DMG is on
-[Releases](https://github.com/CreatorHive/bridle/releases/latest) (Apple silicon, macOS 26 or later).
+[Releases](https://github.com/CreatorHive/bridle/releases/latest) (Apple silicon, macOS 26 or later). On Linux, build an
+AppImage or `.deb` with `npm run dist:linux`.
 
 **Or run it from source:**
 
@@ -111,7 +113,7 @@ You'll need:
 git clone https://github.com/creatorhive/bridle.git
 cd bridle
 npm install
-npm run build:native   # optional: the on-device features above
+npm run build:native   # optional, macOS only: the on-device features above
 npm run dev
 ```
 
@@ -126,9 +128,10 @@ Bridle creates `~/Bridle` on first launch and walks you through setup.
 | `npm test` | vitest. |
 | `npm run build:native` | The Swift helpers: `bridle-helper` and `bridle-notch`. |
 | `npm run dist` | A signed DMG in `dist/` (uses the Developer ID in your keychain; notarizes when Apple credentials are set). |
+| `npm run dist:linux` | An AppImage and a `.deb` in `dist/` (x64, unsigned). |
 | `npm run rebuild` | Rebuilds `node-pty` for Electron (`postinstall` already tries). |
 
-Logs go to `~/Library/Logs/Bridle/bridle.log`.
+Logs go to `~/Library/Logs/Bridle/bridle.log` (`~/.config/Bridle/logs/bridle.log` on Linux).
 
 <details>
 <summary><strong>Without the native helper</strong></summary>
@@ -138,18 +141,44 @@ shows kind icons instead of thumbnails, dictation explains how to build it, and 
 
 </details>
 
+<details id="on-linux">
+<summary><strong>On Linux</strong></summary>
+
+Bridle runs from source (`npm run dev`) or as the AppImage or `.deb` from `npm run dist:linux`. It works like the
+app without the native helper, plus:
+
+- Settings are in `~/.config/Bridle/settings.json`; keys are in `secrets.json` next to it, sealed by your desktop
+  keyring (GNOME Keyring or KWallet). Logs are in `~/.config/Bridle/logs/bridle.log`.
+- Code terminals, run configs and loops use your `$SHELL`; a repo's `.bridle/setup.sh` runs with bash.
+- PDFs are searchable when `pdftotext` (poppler) is installed. Word documents aren't indexed yet.
+- No iMessage or notch. On NVIDIA drivers, GPU compositing is off so Chromium's GPU process doesn't crash.
+- ⌘⇧Space is Ctrl+Shift+Space, but Electron 33 has no global shortcuts under Wayland, so the side chat needs an X11 session.
+- Onboarding opens fullscreen, since Wayland apps can't place their own windows or keep them on top. In tiling window
+  managers (Hyprland, Sway) the layout shrinks to fit tiles narrower than 1000px.
+- LM Studio and OpenAI-compatible models work as on macOS. Code workspaces always run on Claude.
+
+</details>
+
 <details>
 <summary><strong>Troubleshooting</strong></summary>
 
 `node-pty` didn't build: Code terminals fall back to `script(1)`. Run `npm run rebuild` (and again after an Electron
 upgrade).
 
-On Node 24, Electron's postinstall can stop before it finishes unzipping (`Electron failed to install correctly`):
+On Node 24 and later, Electron's postinstall can stop before it finishes unzipping (`Electron failed to install correctly`). On macOS:
 
 ```sh
 Z=$(find ~/Library/Caches/electron -name 'electron-v33.4.11-darwin-*.zip' | head -1)
 rm -rf node_modules/electron/dist && mkdir node_modules/electron/dist && unzip -q "$Z" -d node_modules/electron/dist
 printf 'Electron.app/Contents/MacOS/Electron' > node_modules/electron/path.txt
+```
+
+On Linux:
+
+```sh
+Z=$(find ~/.cache/electron -name 'electron-v33.4.11-linux-x64.zip' | head -1)
+rm -rf node_modules/electron/dist && mkdir node_modules/electron/dist && unzip -q "$Z" -d node_modules/electron/dist
+printf 'electron' > node_modules/electron/path.txt
 ```
 
 </details>

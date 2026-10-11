@@ -1,5 +1,6 @@
 /* Shell layout: chrome title bar and rail around a rounded panel
-   holding the 260px sidebar and the white content. */
+   holding the 260px sidebar and the white content. Narrower than 1000px (Linux tiling WMs ignore the
+   window's minimum size), the sidebar and the side panels shrink with the window. */
 
 .app { display: flex; flex-direction: column; height: 100%; background: var(--chrome); }
 
@@ -36,7 +37,7 @@
   border-radius: var(--r-panel) var(--r-panel) 0 0; overflow: hidden;
 }
 .sidebar {
-  flex: none; width: 260px; display: flex; flex-direction: column; min-height: 0;
+  flex: none; width: clamp(200px, calc(60vw - 340px), 260px); display: flex; flex-direction: column; min-height: 0;
   background: var(--sidebar); border-right: 1px solid rgba(223, 224, 226, 0.7);
 }
 .sidebar-head { display: flex; align-items: center; gap: 8px; padding: 14px 16px 0; }
@@ -59,7 +60,7 @@
 /* The viewer slot opens from 0 to 480 px on the send spring, its panel pinned to the trailing edge so it
    moves in from the right while the content makes room. */
 .viewer-slot { flex: none; width: 0; display: flex; justify-content: flex-end; overflow: hidden; transition: width var(--dur-send) var(--ease-send); }
-.viewer-slot:has(> aside:not([aria-hidden])) { width: 480px; }
+.viewer-slot:has(> aside:not([aria-hidden])) { width: min(480px, 48vw); }
 .viewer-slot > aside { animation: fade-in var(--dur-send) var(--ease-send); }
 
 /* Settings modal: 871×614 panel, 24px radius, over a 20% black backdrop. In and out on

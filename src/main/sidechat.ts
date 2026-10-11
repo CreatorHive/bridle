@@ -53,7 +53,10 @@ export const sideChat: BridleAPI['side'] = {
 }
 
 export function startSideChat(): void {
-  if (!globalShortcut.register(SIDE_CHAT_SHORTCUT, toggle)) console.warn('[side chat] ⌘⇧Space is taken by another app')
+  if (globalShortcut.register(SIDE_CHAT_SHORTCUT, toggle)) return
+  console.warn(process.platform === 'linux' && process.env.XDG_SESSION_TYPE === 'wayland'
+    ? '[side chat] No global shortcuts under Wayland: Ctrl+Shift+Space only works in an X11 session'
+    : '[side chat] ⌘⇧Space is taken by another app')
 }
 
 export function stopSideChat(): void {

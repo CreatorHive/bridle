@@ -1,7 +1,7 @@
 /* FileViewer: 480px panel to the right of the content, 52px header. */
 
 .panel {
-  flex: none; width: 480px; min-height: 0; display: flex; flex-direction: column;
+  flex: none; width: min(480px, 48vw); min-height: 0; display: flex; flex-direction: column;
   background: #fff; border-left: 1px solid var(--border);
   animation: slide-in 250ms var(--ease-modal);
 }

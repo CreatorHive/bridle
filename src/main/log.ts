@@ -2,7 +2,7 @@ import { app, type BrowserWindow } from 'electron'
 import { appendFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 
-// A plain log of what went wrong, at ~/Library/Logs/Bridle/bridle.log, so a crash
+// A plain log of what went wrong, at ~/Library/Logs/Bridle/bridle.log (~/.config/Bridle/logs on Linux), so a crash
 // leaves evidence: main-process exceptions, renderer errors and renderer crashes.
 
 let file: string | null = null

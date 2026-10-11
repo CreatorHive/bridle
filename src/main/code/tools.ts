@@ -5,7 +5,7 @@ import { join } from 'node:path'
 import type { DevToolsState, RunConfig, Space, Workspace } from '../../shared/types'
 import { emit } from '../events'
 import { shellEnv } from './git'
-import { interactiveShell, isWindows, shellCommand } from '../services/util'
+import { interactiveShell, isMac, isWindows, shellCommand } from '../services/util'
 import { clean, detect, serverURL } from './runconfigs'
 
 // Run configurations, workspace setup and terminals. Kept in main for as
@@ -48,7 +48,8 @@ export function setupScript(space: Space, w: Workspace): string | null {
   // The repo's own script: .bridle/setup.sh, or .bridle/setup.ps1 on Windows.
   const file = isWindows ? '.bridle/setup.ps1' : '.bridle/setup.sh'
   if (!existsSync(join(space.root, file)) && !existsSync(join(w.path, file))) return null
-  return isWindows ? '& "$env:BRIDLE_ROOT_PATH/.bridle/setup.ps1"' : 'zsh "$BRIDLE_ROOT_PATH/.bridle/setup.sh"'
+  if (isWindows) return '& "$env:BRIDLE_ROOT_PATH/.bridle/setup.ps1"'
+  return `${isMac ? 'zsh' : 'bash'} "$BRIDLE_ROOT_PATH/.bridle/setup.sh"`
 }
 
 /** Whether a new workspace runs setup by itself: your own setupScript always, the repo's .bridle/setup.sh only once
@@ -62,7 +63,7 @@ export async function state(space: Space, w: Workspace): Promise<DevToolsState> 
   return t.state
 }
 
-/** The setup script in a login zsh in the worktree, output streaming into the setup log. */
+/** The setup script in a login shell in the worktree, output streaming into the setup log. */
 export async function runSetup(space: Space, w: Workspace): Promise<void> {
   const t = of(w.id)
   const script = setupScript(space, w)
@@ -86,7 +87,7 @@ export async function runSetup(space: Space, w: Workspace): Promise<void> {
   })
 }
 
-/** The command in a login zsh at the root, in its own process group so Stop reaches what it spawned. */
+/** The command in a login shell at the root, in its own process group so Stop reaches what it spawned. */
 export async function runConfig(w: Workspace, c: RunConfig): Promise<void> {
   const t = of(w.id)
   if (t.child) stopRun(w.id)
@@ -120,7 +121,7 @@ export async function runConfig(w: Workspace, c: RunConfig): Promise<void> {
   }
   child.stdout?.setEncoding('utf8').on('data', receive)
   child.stderr?.setEncoding('utf8').on('data', receive)
-  child.on('error', (e) => append(t, 'run', `Couldn't start zsh: ${e.message}\n`))
+  child.on('error', (e) => append(t, 'run', `Couldn't start ${shell}: ${e.message}\n`))
   child.on('close', (code) => {
     if (t.child !== child) return // stopped, or a newer run replaced this one
     if (t.partial) show([t.partial])
@@ -155,7 +156,7 @@ export function clearOutput(id: string): void {
   append(of(id), 'run', '', true)
 }
 
-// MARK: Terminals (one interactive login zsh per session)
+// MARK: Terminals (one interactive login shell per session)
 
 interface Term {
   write(data: string): void
@@ -202,8 +203,11 @@ export async function termOpen(w: Workspace, cols: number, rows: number): Promis
     data('Terminals need node-pty: run `npm run rebuild`.\r\n')
     term = { write: () => {}, resize: () => {}, kill: () => {} }
   } else {
-    // Fallback without node-pty: script(1) gives zsh a real tty, but resizing can't reach it.
-    const child = spawn('/usr/bin/script', ['-q', '/dev/null', '/bin/zsh', '-l'], { cwd: w.path, env: { ...env, COLUMNS: String(cols), LINES: String(rows) } })
+    // Fallback without node-pty: script(1) gives the shell a real tty, but resizing can't reach it.
+    // BSD script takes the command as argv; util-linux script takes it as -c.
+    const [shell, shellArgs] = interactiveShell()
+    const scriptArgs = isMac ? ['-q', '/dev/null', shell, ...shellArgs] : ['-q', '-c', [shell, ...shellArgs].join(' '), '/dev/null']
+    const child = spawn('/usr/bin/script', scriptArgs, { cwd: w.path, env: { ...env, COLUMNS: String(cols), LINES: String(rows) } })
     child.stdout.setEncoding('utf8').on('data', data)
     child.stderr.setEncoding('utf8').on('data', data)
     child.on('close', exited)

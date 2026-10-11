@@ -4,7 +4,7 @@ import { copyFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import type { ChangedFile, DiffHunk, DiffLine, FileChange } from '../../shared/types'
-import { isWindows, run, type RunResult } from '../services/util'
+import { interactiveShell, isWindows, run, type RunResult } from '../services/util'
 
 // Every command is argv (no shell) through /usr/bin/env with the login PATH, so a missing tool
 // exits 127; git never prompts (there's no terminal to answer it). On Windows, GUI apps already get the
@@ -12,10 +12,11 @@ import { isWindows, run, type RunResult } from '../services/util'
 
 let loginPATH: Promise<string | null> | null = null
 
-/** PATH from an interactive login zsh, read once; 3 s timeout keeps the current PATH. */
+/** PATH from an interactive login shell (zsh on macOS, $SHELL on Linux), read once; 3 s timeout keeps the current PATH. */
 function readLoginPATH(): Promise<string | null> {
   return new Promise((resolve) => {
-    const child = spawn('/bin/zsh', ['-lic', 'print -r -- "__BRIDLE_PATH__$PATH"'], { stdio: ['ignore', 'pipe', 'ignore'] })
+    const [shell] = interactiveShell()
+    const child = spawn(shell, ['-lic', 'printf "__BRIDLE_PATH__%s\\n" "$PATH"'], { stdio: ['ignore', 'pipe', 'ignore'] })
     let out = ''
     const timer = setTimeout(() => child.kill(), 3000)
     child.stdout.setEncoding('utf8').on('data', (d: string) => (out += d))

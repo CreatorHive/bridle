@@ -14,6 +14,8 @@ export function loadRenderer(win: BrowserWindow, hash?: string): void {
   else void win.loadFile(join(__dirname, '../renderer/index.html'), hash ? { hash } : undefined)
 }
 
+const isLinux = process.platform === 'linux'
+
 let win: BrowserWindow | null = null
 let aside = false
 // CGWindowLevelForKey(.dockWindow) + 1 = 21: Electron's 'modal-panel' is NSModalPanelWindowLevel (8), +13.
@@ -35,7 +37,7 @@ export function showOnboarding(): void {
     movable: false,
     minimizable: false,
     maximizable: false,
-    fullscreenable: false,
+    fullscreenable: isLinux,
     roundedCorners: false,
     enableLargerThanScreen: true, // the frame starts under the menu bar
     focusable: true,
@@ -49,11 +51,17 @@ export function showOnboarding(): void {
   w.webContents.on('will-navigate', (e) => e.preventDefault())
   w.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
   // The page fades itself in and out (OnboardingWindow's 0.6 s on alphaValue), so the window just shows.
-  w.once('ready-to-show', () => {
+  const reveal = () => {
+    if (w.isDestroyed() || w.isVisible()) return
+    // Linux: Wayland can't place a window or keep it on top, and a tiling manager would tile it; fullscreen covers the screen.
+    if (isLinux) w.setFullScreen(true)
     w.show()
     w.focus()
     app.focus({ steal: true })
-  })
+  }
+  w.once('ready-to-show', reveal)
+  // Wayland never paints a hidden window, so ready-to-show can wait forever: show once the page has loaded.
+  if (isLinux) w.webContents.once('did-finish-load', reveal)
   // Closed some other way (⌘W): not onboarded, so it replays next launch; the app comes back.
   w.on('closed', () => {
     if (win !== w) return
@@ -87,6 +95,8 @@ export const onboarding: InvokeAPI['onboarding'] = {
   async stepAside(next) {
     if (!win || next === aside) return
     aside = next
+    // Linux: out of fullscreen while you sign in, so the browser shows beside it.
+    if (isLinux) win.setFullScreen(!aside)
     if (aside) win.setAlwaysOnTop(false)
     else {
       overTheDock(win)
