@@ -1,7 +1,7 @@
 // Pure chat logic (no React, no window.bridle). Everything here is covered by logic.test.ts.
 import {
   PROVIDERS, TASK_STATUSES,
-  type Account, type AgentAction, type ApprovalPolicy, type Chat, type Mail, type Message, type Settings
+  type Account, type AgentAction, type Chat, type Mail, type Message, type Settings
 } from '../../../shared/types'
 
 /** A random UUID, uppercase. */
@@ -14,13 +14,6 @@ export const now = (): string => new Date().toISOString().replace(/\.\d+Z$/, 'Z'
 export function greeting(hour: number, userName: string): string {
   const word = hour < 5 ? 'Good evening' : hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
   return userName ? `${word}, ${userName}` : word
-}
-
-/** ApprovalPolicy.caption: under the chat box. */
-export const POLICY_CAPTION: Record<ApprovalPolicy, string> = {
-  'Always ask': 'Writes outside your workspace need approval.',
-  'Allow app actions': 'Connected apps act without asking.',
-  'Allow everything': 'Almost everything runs without asking.'
 }
 
 /** Provider.current.models / .model / .modelKey, and the top bar's label ("anthropic/x" → "x"). */
@@ -102,6 +95,12 @@ export function traceTarget(step: string): string | null {
   const i = step.indexOf(' ')
   const path = i < 0 ? '' : step.slice(i + 1)
   return /^[^\s·]+(\/[^\s·]*)*\.\w{1,8}$/.test(path) ? path : null
+}
+
+/** Files a reply names in backticks ("`user/files/Plan.docx`"), first four, in order; AgentMessage shows the ones that exist. */
+export function mentionedFiles(text: string): string[] {
+  const paths = [...text.matchAll(/`([^`\n]+\.\w{1,8})`/g)].map((m) => m[1].trim())
+  return [...new Set(paths)].slice(0, 4)
 }
 
 /** JSON with sorted keys (JSONSerialization .sortedKeys), for a permission card's saved input. */

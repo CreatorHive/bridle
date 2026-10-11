@@ -11,6 +11,7 @@ import { composioKey, keychain } from './services/keychain'
 import { claudeBinary } from './services/llm'
 import { lmStudio } from './services/lmstudio'
 import { avatar, memory } from './services/memory'
+import { renameIdentity } from './services/seed'
 import { settings } from './services/settings'
 import { mcp } from './services/mcp'
 import { tasks } from './services/tasks'
@@ -19,13 +20,14 @@ import { workspace } from './services/workspace'
 import { search } from './search/service'
 import { native } from './native'
 import { onboarding } from './onboarding'
-import { away, watcher } from './watch'
+import { away, forward, watcher } from './watch'
 
 /** Banners only while Bridle isn't focused, and only if that kind is switched on. */
 const notify: InvokeAPI['notify'] = {
   async post(title, body, chatId, when) {
     if (when && !(await settings.get(when))) return
     banner(title, body, chatId ?? undefined)
+    if (when === 'notifyApprovals') void forward(body) // a card waiting while you're away from the Mac
   }
 }
 
@@ -46,7 +48,16 @@ const about: InvokeAPI['about'] = {
 }
 
 /** Every contract group, implemented. Typed against BridleAPI, so a missing method fails typecheck. */
-const services: InvokeAPI = { workspace, settings, keychain, composio, gmail, calendar, tasks, automations, mcp, side: sideChat, agent, watcher, away, notify, search, viewer, memory, avatar, lmStudio, about, code, native, shell, onboarding, phone }
+/** Settings, plus IDENTITY.md following the agent's name. */
+const settingsService: InvokeAPI['settings'] = {
+  ...settings,
+  async set(key, value) {
+    await settings.set(key, value)
+    if (key === 'agentName') await renameIdentity(String(value)).catch(() => {})
+  }
+}
+
+const services: InvokeAPI = { workspace, settings: settingsService, keychain, composio, gmail, calendar, tasks, automations, mcp, side: sideChat, agent, watcher, away, notify, search, viewer, memory, avatar, lmStudio, about, code, native, shell, onboarding, phone }
 
 /** One ipcMain.handle per method in API_METHODS: "<group>:<method>" → services[group][method](...args). */
 export function registerIpc(): void {

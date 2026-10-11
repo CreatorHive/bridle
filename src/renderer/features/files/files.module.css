@@ -136,7 +136,11 @@
 .entry { display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 10px; border-radius: 10px; cursor: default; }
 .entry:hover { background: var(--hover); }
 .entry.entryOn { background: var(--selected); }
-.entry .name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-13); }
+.entry .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-13); }
+.entryType, .entryWhen, .entrySize { flex: none; font-size: calc(12.5px * var(--zoom)); color: var(--tertiary); white-space: nowrap; }
+.entryType { width: 64px; }
+.entryWhen { width: 140px; }
+.entrySize { width: 64px; text-align: right; }
 .folderIcon { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; color: var(--brand-400); background: var(--brand-25); }
 .nameInput { flex: 1; height: 28px; padding: 0 8px; border: 0; border-radius: 6px; outline: 2px solid var(--brand-400); font: inherit; font-size: var(--fs-13); }
 .driveEmpty {

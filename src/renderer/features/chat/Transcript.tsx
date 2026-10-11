@@ -3,7 +3,7 @@ import { Check, ChevronRight, Copy, FileText, Volume2, X } from 'lucide-react'
 import type { Message, ToolCall } from '../../../shared/types'
 import { Avatar, Button, ShimmerText, StreamingMarkdown, Swap } from '../../components'
 import { play } from '../../sound'
-import { basename, extractActions, isImage, traceTarget, absolutePath } from './logic'
+import { basename, extractActions, isImage, mentionedFiles, traceTarget, absolutePath } from './logic'
 import { deniedNow, workspaceRoot } from './session'
 import { ToolCard } from './ToolCard'
 import { viewer } from '../viewer'
@@ -57,6 +57,20 @@ function MessageRow({ chatId, message, agentName, fresh, working }:
 /** Opens a file in the viewer side panel (Viewer.open plays `open`, so the buttons stay silent). */
 const open = (path: string) => void workspaceRoot().then((ws) => viewer.open(absolutePath(path, ws)))
 
+/** Which of `paths` (workspace-relative or absolute) exist, each with its absolute path. */
+function useFound(paths: string[]): Map<string, string> {
+  const [found, setFound] = useState<Map<string, string>>(new Map())
+  const key = paths.join('\n')
+  useEffect(() => {
+    let live = true
+    void workspaceRoot().then((ws) => Promise.all(paths.map((p) =>
+      window.bridle.viewer.inspect(absolutePath(p, ws)).then(() => [p, absolutePath(p, ws)] as const, () => null))))
+      .then((hits) => live && setFound(new Map(hits.filter((h) => !!h))))
+    return () => { live = false }
+  }, [key]) // eslint-disable-line react-hooks/exhaustive-deps -- paths is a fresh array each render
+  return found
+}
+
 let picture: Promise<string | null> | null = null
 /** AgentPicture: agent/avatar.png in the workspace, or initials without one. */
 function useAgentPicture(): string | null {
@@ -86,6 +100,8 @@ export function AgentAvatar({ name, size = 36, thinking = false, plain = false }
 function AgentMessage({ message, agentName, fresh, live }: { message: Message; agentName: string; fresh: boolean; live: boolean }) {
   const [copied, setCopied] = useState(false)
   const trace = message.trace ?? []
+  const text = extractActions(message.text).text
+  const files = useFound(message.status == null ? mentionedFiles(text) : [])
   return (
     <div className={`${s.agent} ${fresh ? 'b-reply-entry' : ''}`} onMouseLeave={() => setCopied(false)}>
       <AgentAvatar name={agentName} thinking={message.status != null} />
@@ -97,7 +113,17 @@ function AgentMessage({ message, agentName, fresh, live }: { message: Message; a
           <>
             {/* An action block streams in as raw JSON; hide it until it becomes a card. A reply that
                 arrives while you watch fades in character by character from its first chunk. */}
-            <StreamingMarkdown text={extractActions(message.text).text} fromStart={live} />
+            <StreamingMarkdown text={text} fromStart={live} />
+            {/* Files the reply names, as the cards attachments get; a card opens its file. */}
+            {files.size > 0 && (
+              <div className={`${s.files} ${s.mentioned}`}>
+                {[...files].map(([rel, path]) => (
+                  <Button key={rel} cue={null} className={s.chipButton} onClick={() => open(path)}>
+                    <AttachmentChip path={path} />
+                  </Button>
+                ))}
+              </div>
+            )}
             {trace.length > 0 && <Trace trace={trace} calls={message.calls ?? []} />}
             <div className={s.actions}>
               <Button cue={null} className={s.actionButton} title="Copy" aria-label="Copy" onClick={() => {
@@ -127,17 +153,8 @@ function speak(text: string) {
 /** What the agent did, one line per step (12.5pt mono). A step naming a file that exists opens it (no cue);
  *  a step with a recorded tool call opens to what it sent and got back. */
 function Trace({ trace, calls }: { trace: string[]; calls: ToolCall[] }) {
-  const [found, setFound] = useState<Set<string>>(new Set())
+  const found = useFound([...new Set(trace.map(traceTarget).filter((p): p is string => !!p))])
   const [shown, setShown] = useState<number | null>(null)
-  const key = trace.join('\n')
-  useEffect(() => {
-    let live = true
-    const paths = [...new Set(trace.map(traceTarget).filter((p): p is string => !!p))]
-    void workspaceRoot().then((ws) => Promise.all(paths.map((p) =>
-      window.bridle.viewer.inspect(absolutePath(p, ws)).then(() => p, () => null))))
-      .then((hits) => live && setFound(new Set(hits.filter((p): p is string => !!p))))
-    return () => { live = false }
-  }, [key]) // eslint-disable-line react-hooks/exhaustive-deps -- trace is a fresh array each render
   return (
     <ul className={s.trace}>
       {trace.map((step, i) => {

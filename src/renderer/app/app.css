@@ -10,6 +10,13 @@
   -webkit-app-region: drag;
 }
 [data-platform='win'] .titlebar, [data-platform='linux'] .titlebar { padding-right: 140px; }
+/* Right of the traffic lights on macOS; the left edge elsewhere (the system buttons are on the right). */
+.titlebar-toggle {
+  position: absolute; left: 84px; top: 6px; width: 28px; height: 26px; border-radius: 7px;
+  display: grid; place-items: center; color: var(--secondary); -webkit-app-region: no-drag; --press: 0.94;
+}
+.titlebar-toggle:hover { background: var(--hover); color: var(--text); }
+[data-platform='win'] .titlebar-toggle, [data-platform='linux'] .titlebar-toggle { left: 16px; }
 .titlebar h1 {
   margin: 0; max-width: 420px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   font-size: var(--fs-13); font-weight: 600; color: var(--text);
@@ -39,7 +46,10 @@
 .sidebar {
   flex: none; width: clamp(200px, calc(60vw - 340px), 260px); display: flex; flex-direction: column; min-height: 0;
   background: var(--sidebar); border-right: 1px solid rgba(223, 224, 226, 0.7);
+  transition: margin-left var(--dur-send) var(--ease-send), opacity var(--dur-send) var(--ease-send);
 }
+/* Hidden: slides out past the panel's left edge (the panel clips it) while the content widens into the room. */
+.sidebar-hidden .sidebar { margin-left: -261px; opacity: 0; }
 .sidebar-head { display: flex; align-items: center; gap: 8px; padding: 14px 16px 0; }
 .sidebar-head img { width: 26px; height: 26px; }
 .sidebar-head span { flex: 1; font-size: var(--fs-17); font-weight: 600; }
@@ -53,6 +63,8 @@
   font-family: var(--font); font-size: var(--fs-11); font-weight: 500;
 }
 .sidebar-scroll { flex: 1; overflow-y: auto; padding: 0 10px 10px; display: flex; flex-direction: column; gap: 2px; }
+/* Rows and headers keep their height; a long list scrolls instead of squeezing. */
+.sidebar-scroll > * { flex-shrink: 0; }
 .sidebar-scroll::-webkit-scrollbar { display: none; }
 .sidebar-gap { height: 4px; flex: none; }
 

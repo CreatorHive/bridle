@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, type ReactNode } from 'react'
 import type { Account, Chat, Mail, Mailbox, SettingKey, Settings } from '../../shared/types'
-import { play, setMuted, setSoundVolume } from '../sound'
+import { play, setMuted, setSoundVolume, setStreamSound } from '../sound'
 
 // App-wide UI state. Small on purpose:
 // features keep their own data in their folder and only share what the shell must show
@@ -161,7 +161,8 @@ export function AppProvider({ children, initialState }: { children: ReactNode; i
     if (!state.settings) return
     setMuted(state.settings.soundMuted)
     setSoundVolume(state.settings.soundVolume)
-  }, [state.settings?.soundMuted, state.settings?.soundVolume])
+    setStreamSound(state.settings.soundStreaming)
+  }, [state.settings?.soundMuted, state.settings?.soundVolume, state.settings?.soundStreaming])
 
   const app = useMemo<App>(() => ({
     state,

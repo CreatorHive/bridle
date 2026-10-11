@@ -9,6 +9,7 @@ directories:
   buildResources: build
 files:
   - out/**
+  - resources/** # the menu-bar and window icons, read at run time
   - package.json
 asarUnpack:
   - "**/node_modules/node-pty/**"

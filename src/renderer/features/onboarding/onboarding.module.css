@@ -126,6 +126,8 @@
 .cancel { font-size: calc(12.5px * var(--zoom)); font-weight: 500; color: var(--secondary); }
 .connectButton { height: 30px; padding: 0 14px; border-radius: 999px; background: var(--brand-300); color: #fff; font-size: var(--fs-13); font-weight: 500; }
 .connectButton:disabled { opacity: 0.5; }
+.keyIcon { flex: none; margin: 0 5px; color: var(--secondary); }
+.keyInput { flex: 1; min-width: 0; height: 34px; padding: 0 12px; border: 0; outline: none; border-radius: 10px; background: rgba(0, 0, 0, 0.05); font: inherit; font-size: var(--fs-13); }
 .connectFoot { display: flex; align-items: center; gap: 8px; }
 .connectError {
   min-width: 0; color: #fff; font-size: var(--fs-12);

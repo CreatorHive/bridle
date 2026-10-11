@@ -56,10 +56,12 @@ export const viewer: BridleAPI['viewer'] = {
 
   async list(dir) {
     const entries = await readdir(dir, { withFileTypes: true })
-    return entries
-      .filter((e) => !e.name.startsWith('.'))
-      .map((e) => ({ path: join(dir, e.name), name: e.name, folder: e.isDirectory() && !isPackage(e.name) }))
-      .sort((a, b) => (a.folder !== b.folder ? (a.folder ? -1 : 1) : a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })))
+    const listed = await Promise.all(entries.filter((e) => !e.name.startsWith('.')).map(async (e) => {
+      const path = join(dir, e.name)
+      const s = await stat(path).catch(() => null)
+      return { path, name: e.name, folder: e.isDirectory() && !isPackage(e.name), size: s?.isFile() ? s.size : 0, modified: s ? s.mtime.toISOString() : '' }
+    }))
+    return listed.sort((a, b) => (a.folder !== b.folder ? (a.folder ? -1 : 1) : a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })))
   },
 
   async save(path, text) {

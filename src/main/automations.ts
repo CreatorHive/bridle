@@ -1,10 +1,11 @@
 import { createHash, randomUUID } from 'node:crypto'
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, powerMonitor } from 'electron'
 import type { BridleAPI, BridleEvents } from '../shared/api'
 import type { Loop, Routine } from '../shared/types'
 import { banner, emit, onEmit } from './events'
+import { interrupted, RESUME } from './services/agent'
 import { tasks } from './services/tasks'
 import { cliEnv, isWindows, iso, run } from './services/util'
 import { workspaceRoot } from './services/workspace'
@@ -331,6 +332,10 @@ export function startAutomations(): void {
   })
   setInterval(() => void tick(), 60_000)
   setTimeout(() => void tick(), 10_000)
+  // After sleep, once the network is back, instead of at the next minute.
+  powerMonitor.on('resume', () => setTimeout(() => void tick(), 15_000))
+  // Replies a quit or crash cut off carry on, through the window like any background turn.
+  void interrupted().then((ids) => ids.forEach((id) => startTurn(id, 'Chat', RESUME))).catch(() => {})
 }
 
 // MARK: API

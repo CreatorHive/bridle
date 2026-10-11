@@ -5,7 +5,7 @@
 // store, so back-to-back stream events never build on a stale render. sync() takes the store's
 // chats back in, keeping ours wherever the store only holds an older copy of our own edit.
 import type { AgentEvent, Chat, Message } from '../../../shared/types'
-import { play } from '../../sound'
+import { play, streamTick } from '../../sound'
 import { cleanError, extractActions, mergeChat, needsTitle, now, relativePath, sortedJSON, uuid, watcherTurn } from './logic'
 
 let latest: Chat[] = []
@@ -144,7 +144,9 @@ async function reply(o: SendOptions, id: string, prompt: string): Promise<void> 
       }))
       case 'result': return update((m) => ({ calls: m.calls?.map((c) => (c.id === event.id ? { ...c, result: event.result, error: event.error } : c)) }))
       case 'worker': return update((m) => (m.workers?.includes(event.worker) ? {} : { workers: [...(m.workers ?? []), event.worker] }))
-      case 'text': return update((m) => ({ status: null, workers: [], text: m.text + event.text }))
+      case 'text':
+        streamTick()
+        return update((m) => ({ status: null, workers: [], text: m.text + event.text }))
       case 'error': failure = event.message; return
       case 'permission': {
         // The run is paused until you answer this card. The tool's arguments travel with it, capped for huge writes.

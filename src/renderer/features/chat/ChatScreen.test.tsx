@@ -10,12 +10,12 @@ const render = (state: Partial<AppState>) =>
   renderToString(<AppProvider initialState={{ settings, ...state }}><ChatScreen /></AppProvider>)
 
 describe('ChatScreen', () => {
-  it('greets on a new chat, with the model and policy caption', () => {
+  it('greets on a new chat, with the model', () => {
     const html = render({ chatId: null })
     expect(html).toMatch(/Good (morning|afternoon|evening), Sean/)
     expect(html).toContain('Ask Ruby…')
     expect(html).toContain('Claude Opus')
-    expect(html).toContain('Writes outside your workspace need approval.')
+    expect(html).not.toContain('without asking')
   })
 
   it('renders every kind of turn', () => {

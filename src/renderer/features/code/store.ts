@@ -6,7 +6,7 @@ import {
   DEFAULT_CODE_PREFS,
   type ChangedFile, type Chat, type CodeAgentState, type CodePrefs, type DevToolsState, type Space, type Workspace
 } from '../../../shared/types'
-import { play } from '../../sound'
+import { play, streamTick } from '../../sound'
 import { disposeTerminal } from './Terminal'
 
 /** CodeTab: a chat (the open one), or a diff, file or review tab you opened. */
@@ -175,14 +175,18 @@ export function wire(): void {
   on('code:workspaces', () => void refresh())
   on('notify:opened', (p) => { if ('workspaceId' in p) select(p.workspaceId) }) // a notch row
   on('code:chat', ({ workspaceId, chat }) => setState((s) => ({ chats: { ...s.chats, [workspaceId]: upsertChat(s.chats[workspaceId], chat) } })))
-  on('code:message', ({ workspaceId, chatId, message }) => setState((s) => ({
+  on('code:message', ({ workspaceId, chatId, message }) => {
+    const old = state.chats[workspaceId]?.find((c) => c.id === chatId)?.messages.find((m) => m.id === message.id)
+    if (old && message.text.length > old.text.length) streamTick() // the reply's text grew, not its trace or status
+    setState((s) => ({
     chats: {
       ...s.chats,
       [workspaceId]: (s.chats[workspaceId] ?? []).map((c) => (c.id !== chatId ? c : {
         ...c, messages: c.messages.some((m) => m.id === message.id) ? c.messages.map((m) => (m.id === message.id ? message : m)) : [...c.messages, message]
       }))
     }
-  })))
+    }))
+  })
   on('code:agent', (a) => {
     const before = state.agents[a.workspaceId]
     setState((s) => ({ agents: { ...s.agents, [a.workspaceId]: a } }))

@@ -5,7 +5,7 @@ import { Button, Row, SidebarHeader, createStore } from '../../components'
 import { play } from '../../sound'
 import type { ContextItem } from '../tasks/ContextMenu'
 import { KindIcon, fileItems, type Actions } from './FilesScreen'
-import { KINDS, KIND_INFO, fileKind, kindCount } from './logic'
+import { KINDS, KIND_INFO, byteCount, fileKind, kindCount, when } from './logic'
 import s from './files.module.css'
 
 // Files' sidebar and its Drive: the Library (recent files by kind) and the workspace's drive/ folder as a tree,
@@ -72,8 +72,8 @@ export function FilesSidebar() {
     const sub = kids[path]?.filter((e) => e.folder)
     const open = expanded.includes(path) || path === drive
     return [
-      <Button key={path} cue="select" className={`b-row ${s.treeRow} ${dir === path ? 'selected' : ''}`} style={{ paddingLeft: 8 + depth * 14 }}
-        aria-current={dir === path || undefined} onClick={() => openFolder(path)}>
+      <Button key={path} cue="select" className={`b-row ${s.treeRow} ${dir === path && !system ? 'selected' : ''}`} style={{ paddingLeft: 8 + depth * 14 }}
+        aria-current={dir === path || undefined} onClick={() => { files.set({ system: false }); openFolder(path) }}>
         <span className={`${s.chev} ${open ? s.chevOpen : ''}`} style={sub && !sub.length || path === drive ? { visibility: 'hidden' } : undefined}
           onClick={(e) => {
             e.stopPropagation()
@@ -97,7 +97,8 @@ export function FilesSidebar() {
         <Row key={k} title={KIND_INFO[k].title} icon={KIND_ICON[k]} selected={on(k)} badge={kindCount(list, k) || null}
           onClick={() => library(k)} />
       ))}
-      <Row title="Bridle's files" icon={<Settings size={16} />} selected={on(null, true)} onClick={() => library(null, true)}
+      <Row title="Bridle's files" icon={<Settings size={16} />} selected={system && dir !== null}
+        onClick={() => { if (home) { files.set({ kind: null, system: true }); openFolder(home) } }}
         help="The agent's persona and memory, chats, tasks, notes and app state" />
       <SidebarHeader title="Drive" divider={false} />
       {drive && branch(drive, 'Drive', 0)}
@@ -105,25 +106,37 @@ export function FilesSidebar() {
   )
 }
 
-const asFile = (e: FolderEntry): WorkspaceFile =>
-  ({ path: e.path, name: e.name, kind: fileKind(e.name), size: 0, modified: '', opened: '', system: false })
+const asFile = (e: FolderEntry, system = false): WorkspaceFile =>
+  ({ path: e.path, name: e.name, kind: fileKind(e.name), size: e.size ?? 0, modified: e.modified ?? '', opened: '', system })
 
-/** Drive → dir, as [path, name] pairs for the breadcrumb. */
-function crumbs(drive: string, dir: string): [string, string][] {
-  const out: [string, string][] = [[drive, 'Drive']]
-  let path = drive
-  for (const part of dir.slice(drive.length).split('/').filter(Boolean)) out.push([(path = `${path}/${part}`), part])
+/** "Folder", "Text" for notes and Markdown, else the extension: "JSONL", "PNG". */
+function typeName(e: FolderEntry): string {
+  if (e.folder) return 'Folder'
+  const ext = e.name.includes('.') ? e.name.slice(e.name.lastIndexOf('.') + 1).toLowerCase() : ''
+  return ['md', 'txt', 'markdown'].includes(ext) ? 'Text' : ext.toUpperCase() || 'File'
+}
+
+/** root → dir, as [path, name] pairs for the breadcrumb. */
+function crumbs(root: string, label: string, dir: string): [string, string][] {
+  const out: [string, string][] = [[root, label]]
+  let path = root
+  for (const part of dir.slice(root.length).split('/').filter(Boolean)) out.push([(path = `${path}/${part}`), part])
   return out
 }
 
 /** The open Drive folder: breadcrumb, New folder, Add files, and its entries. */
-export function DriveView({ dir, choose, actions, contextMenu }: {
+export function DriveView({ root, label, system = false, dir, choose, actions, contextMenu }: {
+  /** The breadcrumb's first folder: drive/, or the workspace itself for Bridle's files. */
+  root: string
+  label: string
+  /** Bridle's files: browse and open, but no new folders, uploads or Move to Trash here. */
+  system?: boolean
   dir: string
   choose(): void
   actions: Actions
   contextMenu(e: MouseEvent, items: ContextItem[]): void
 }) {
-  const { home, kids } = files.use()
+  const { kids } = files.use()
   const [selected, setSelected] = useState<string | null>(null)
   const [naming, setNaming] = useState(false)
   useEffect(() => {
@@ -148,7 +161,7 @@ export function DriveView({ dir, choose, actions, contextMenu }: {
   const folderItems = (e: FolderEntry): ContextItem[] => [
     { label: 'Open', icon: <FolderOpen size={14} />, onSelect: () => openFolder(e.path) },
     { label: 'Show in Finder', icon: <Folder size={14} />, onSelect: () => void window.bridle.workspace.revealInFinder(e.path) },
-    { label: 'Move to Trash', icon: <Trash2 size={14} />, destructive: true, divider: true, onSelect: () => void trash(e.path) }
+    ...(system ? [] : [{ label: 'Move to Trash', icon: <Trash2 size={14} />, destructive: true, divider: true, onSelect: () => void trash(e.path) }])
   ]
   const fileActions: Actions = { ...actions, trash: (f) => void trash(f.path) }
 
@@ -157,15 +170,17 @@ export function DriveView({ dir, choose, actions, contextMenu }: {
     <div className={s.drive}>
       <div className={s.bar}>
         <nav className={s.crumbs} aria-label="Folder">
-          {crumbs(drivePath(home), dir).map(([path, name], i, all) => (
+          {crumbs(root, label, dir).map(([path, name], i, all) => (
             <span key={path}>
               {i > 0 && <ChevronRight size={12} />}
               {i === all.length - 1 ? <strong>{name}</strong> : <button onClick={() => openFolder(path)}>{name}</button>}
             </span>
           ))}
         </nav>
-        <Button cue={null} className={s.add} onClick={() => setNaming(true)}><FolderPlus size={15} />New folder</Button>
-        <Button cue={null} className={`${s.add} ${s.primary}`} onClick={choose}><Plus size={15} />Add files</Button>
+        {!system && <>
+          <Button cue={null} className={s.add} onClick={() => setNaming(true)}><FolderPlus size={15} />New folder</Button>
+          <Button cue={null} className={`${s.add} ${s.primary}`} onClick={choose}><Plus size={15} />Add files</Button>
+        </>}
       </div>
 
       <div className={s.entries} role="list">
@@ -184,17 +199,21 @@ export function DriveView({ dir, choose, actions, contextMenu }: {
         {entries?.map((e) => (
           <div key={e.path} role="listitem" className={`${s.entry} ${selected === e.path ? s.entryOn : ''}`}
             onClick={(ev) => {
-              if (ev.detail === 2) return e.folder ? openFolder(e.path) : actions.open(asFile(e))
+              if (ev.detail === 2) return e.folder ? openFolder(e.path) : actions.open(asFile(e, system))
               play('select')
               setSelected(e.path)
             }}
-            onContextMenu={(ev) => contextMenu(ev, e.folder ? folderItems(e) : fileItems(asFile(e), fileActions))}>
+            onContextMenu={(ev) => contextMenu(ev, e.folder ? folderItems(e) : fileItems(asFile(e, system), fileActions))}>
             {e.folder ? <span className={s.folderIcon}><Folder size={18} fill="currentColor" fillOpacity={0.15} /></span>
-              : <KindIcon kind={fileKind(e.name)} file={asFile(e)} size={30} />}
+              : <KindIcon kind={fileKind(e.name)} file={asFile(e, system)} size={30} />}
             <span className={s.name}>{e.name}</span>
+            <span className={s.entryType}>{typeName(e)}</span>
+            <span className={s.entryWhen}>{e.modified ? when(e.modified) : ''}</span>
+            <span className={s.entrySize}>{e.folder ? '' : byteCount(e.size ?? 0)}</span>
           </div>
         ))}
-        {entries?.length === 0 && !naming && (
+        {entries?.length === 0 && !naming && system && <div className={s.driveEmpty}><FolderOpen size={22} strokeWidth={1.6} /><strong>Folder is empty</strong></div>}
+        {entries?.length === 0 && !naming && !system && (
           <div className={s.driveEmpty}>
             <FolderOpen size={22} strokeWidth={1.6} />
             <strong>Folder is empty</strong>
