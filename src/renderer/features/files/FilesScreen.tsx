@@ -13,7 +13,7 @@ import {
   related, shownFiles, thumbnailable, when, type Sort
 } from './logic'
 import { useViewer, viewer } from '../viewer'
-import { DriveView, files as nav, load } from './DriveView'
+import { DriveView, drivePath, files as nav, load } from './DriveView'
 import s from './files.module.css'
 
 const KIND_ICON: Record<FileKind, LucideIcon> = {
@@ -141,9 +141,9 @@ export function FilesScreen() {
   const add = async (paths: string[]) => {
     if (!paths.length) return
     try {
-      const added = await window.bridle.workspace.addFiles(paths, inDrive ? dir.slice(home.length + 1) : undefined)
+      const added = await window.bridle.workspace.addFiles(paths, inDrive && !system ? dir.slice(home.length + 1) : undefined)
       play('success')
-      if (inDrive) void load(dir)
+      if (inDrive && !system) void load(dir)
       await refresh(added[0])
     } catch {
       play('error')
@@ -198,8 +198,9 @@ export function FilesScreen() {
       <div className={`${s.content} ${inDrive ? s.fill : ''}`}>
         <div className={s.header}>
           <div className={s.titles}>
-            <h1>{inDrive ? 'Drive' : system ? "Bridle's files" : kind ? KIND_INFO[kind].title : 'Files'}</h1>
-            <p>{inDrive ? 'Your folders. Bridle can read, search and organize them.' : 'Work with your files, ask questions, and take action.'}</p>
+            <h1>{system ? "Bridle's files" : inDrive ? 'Drive' : kind ? KIND_INFO[kind].title : 'Files'}</h1>
+            <p>{system ? "Its operating system: persona, memory, prompts, workers and routines. Edits change how it works."
+              : inDrive ? 'Your folders. Bridle can read, search and organize them.' : 'Work with your files, ask questions, and take action.'}</p>
           </div>
           <div className={s.actions}>
             {!inDrive && (
@@ -217,7 +218,8 @@ export function FilesScreen() {
         </div>
 
         {inDrive ? (
-          <DriveView dir={dir} choose={() => void choose()} actions={actions} contextMenu={(e, items) => menu.open(e, items)} />
+          <DriveView root={system ? home : drivePath(home)} label={system ? 'Bridle' : 'Drive'} system={system} dir={dir}
+            choose={() => void choose()} actions={actions} contextMenu={(e, items) => menu.open(e, items)} />
         ) : (<>
 
         <div className={`${s.tiles} ${compact ? s.compact : ''}`}>

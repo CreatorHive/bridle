@@ -6,7 +6,7 @@ import { afterEach, expect, it, vi } from 'vitest'
 // Agent files live at the workspace root and are read each turn, on a temp workspace only.
 vi.mock('electron', () => ({ app: {}, shell: {}, dialog: {}, nativeImage: {}, BrowserWindow: { getAllWindows: () => [] } }))
 
-const { seedWorkspace } = await import('./seed')
+const { renamed, seedWorkspace } = await import('./seed')
 const { BOOT_FILES, bootstrap, memoryRules } = await import('./agent')
 
 let ws = ''
@@ -48,4 +48,14 @@ it('replaces the first AGENTS.md only while it is unedited, and tells the agent 
   expect(readFileSync(join(ws, 'AGENTS.md'), 'utf8')).toContain('- Mine.')
 
   expect(memoryRules('Sean', new Date('2026-10-10T12:00:00Z'))).toContain('memory/2026-10-10.md')
+
+  writeFileSync(join(ws, 'HEARTBEAT.md'), "# Heartbeat: when to write first\n\nWrite in Home only when the user must act or decide soon and waiting costs something: someone is blocked, a deadline or meeting is today or tomorrow, a check failed on their own work, a security alert.\n\nStay quiet when it's resolved, someone else owns it, or you've already said it.\n\nSay who needs what and why now, then offer one next step (\"Want me to draft the reply?\"). Never send on your own.\n")
+  await seedWorkspace(ws, { agent: 'Bridle', user: 'Sean' })
+  expect(readFileSync(join(ws, 'HEARTBEAT.md'), 'utf8')).toContain('## Check each time')
+})
+
+it('keeps IDENTITY.md\'s name in step with Settings', () => {
+  expect(renamed('# Identity\n\n- Name: Bridle\n- Role: Router\n', 'Zephyr')).toBe('# Identity\n\n- Name: Zephyr\n- Role: Router\n')
+  expect(renamed('# Identity\n\nMine.\n', 'Zephyr')).toBe('# Identity\n\n- Name: Zephyr\n\nMine.\n')
+  expect(renamed('', 'Zephyr')).toBe('# Identity\n\n- Name: Zephyr\n')
 })

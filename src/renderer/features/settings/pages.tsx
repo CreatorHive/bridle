@@ -86,6 +86,11 @@ function General() {
         <SettingsRow label="Interface sounds" description="Soft cues for presses, toggles and replies">
           <Toggle label="Interface sounds" checked={!s_.soundMuted} onChange={(on) => setSetting('soundMuted', !on)} />
         </SettingsRow>
+        {!s_.soundMuted && (
+          <SettingsRow label="Streaming text" description="A quiet key tick as replies type themselves out">
+            <Toggle label="Streaming text" checked={s_.soundStreaming} onChange={(v) => setSetting('soundStreaming', v)} />
+          </SettingsRow>
+        )}
       </SettingsCard>
       <PhoneSection />
       <SectionLabel>Onboarding</SectionLabel>
