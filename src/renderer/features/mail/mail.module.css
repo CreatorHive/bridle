@@ -1,7 +1,7 @@
-/* A 400px inbox column beside the reader. */
+/* A 400px inbox column beside the reader (narrower below a 1000px window). */
 
 .screen { display: flex; height: 100%; }
-.list { width: 400px; flex: none; display: flex; flex-direction: column; min-height: 0; border-right: 1px solid rgba(223, 224, 226, 0.7); }
+.list { width: clamp(260px, calc(60vw - 200px), 400px); flex: none; display: flex; flex-direction: column; min-height: 0; border-right: 1px solid rgba(223, 224, 226, 0.7); }
 .reader { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; }
 
 .head { display: flex; align-items: flex-start; gap: 4px; padding: 18px 20px 0; }
@@ -84,8 +84,9 @@
 .sender { display: flex; align-items: flex-start; gap: 12px; }
 .senderText { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; font-size: var(--fs-13); color: var(--tertiary); }
 .senderText > div { display: flex; align-items: baseline; gap: 8px; }
-.senderText strong { font-size: var(--fs-15); font-weight: 600; color: var(--text); }
-.sender .time { padding-top: 3px; }
+.senderText strong { flex: none; font-size: var(--fs-15); font-weight: 600; color: var(--text); white-space: nowrap; }
+.senderText > div > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sender .time { flex: none; padding-top: 3px; white-space: nowrap; }
 .starred { color: var(--orange); }
 .text { font-size: var(--fs-15); line-height: calc(1.2em + 6px); white-space: pre-wrap; user-select: text; cursor: text; overflow-wrap: anywhere; }
 .html { width: 100%; border: 0; display: block; }

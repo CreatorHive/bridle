@@ -12,6 +12,7 @@
   },
   "bugs": "https://github.com/creatorhive/bridle/issues",
   "main": "out/main/index.js",
+  "desktopName": "bridle.desktop",
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
@@ -20,6 +21,7 @@
     "test": "vitest run",
     "build:native": "swift build -c release --package-path native/BridleHelper",
     "dist": "npm run build && npm run build:native && electron-builder --mac --publish never",
+    "dist:linux": "npm run build && electron-builder --linux --publish never",
     "rebuild": "electron-rebuild -f -o node-pty",
     "postinstall": "electron-rebuild -f -o node-pty || echo \"node-pty did not build for Electron: Code terminals fall back to a plain shell\""
   },

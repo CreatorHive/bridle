@@ -1,4 +1,5 @@
 import { app, BrowserWindow, dialog, Menu, nativeImage, shell } from 'electron'
+import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { installCrashLogging, watchWindow } from './log'
 import icon from '../../resources/icon.png?asset' // the Bridle mark (build/icon.icns for packaged builds)
@@ -20,8 +21,8 @@ function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
     width: 1280,
     height: 820,
-    minWidth: 1000,
-    minHeight: 640,
+    // Tiling window managers on Linux ignore a minimum size and crop the page to the tile; the layout shrinks instead.
+    ...(process.platform === 'linux' ? {} : { minWidth: 1000, minHeight: 640 }),
     show: false,
     // macOS: traffic lights inset into the 38px chrome strip. Windows/Linux: the system buttons drawn over it.
     ...(process.platform === 'darwin'
@@ -40,9 +41,12 @@ function createWindow(): BrowserWindow {
     }
   })
   // Onboarding covers the screen and brings this window forward when it finishes.
-  win.once('ready-to-show', () => {
-    if (!onboardingOpen() && !openedAtLogin()) win.show()
-  })
+  const reveal = () => {
+    if (!onboardingOpen() && !openedAtLogin() && !win.isVisible()) win.show()
+  }
+  win.once('ready-to-show', reveal)
+  // Wayland never paints a hidden window, so ready-to-show can wait forever: show once the page has loaded.
+  if (process.platform === 'linux') win.webContents.once('did-finish-load', reveal)
   // Closing hides: the agent keeps running (routines, loops and the watcher send through this window). Quit ends it.
   win.on('close', (e) => {
     if (quitting) return
@@ -65,6 +69,10 @@ function createWindow(): BrowserWindow {
 }
 
 app.setName('Bridle')
+
+// Linux on NVIDIA: Chromium's GPU compositor can't share images with the driver (eglCreateImage fails), so the GPU
+// process restarts until Chromium gives up and quits. Software compositing keeps WebGL and video on the GPU.
+if (process.platform === 'linux' && existsSync('/proc/driver/nvidia')) app.commandLine.appendSwitch('disable-gpu-compositing')
 
 installCrashLogging()
 

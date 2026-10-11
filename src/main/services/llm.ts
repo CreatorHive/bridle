@@ -15,7 +15,9 @@ export function claudeBinary(): string | null {
   // On Windows the native installer puts claude.exe in ~/.local/bin; a .cmd shim (npm) can't be spawned without a shell.
   const candidates = process.platform === 'win32'
     ? [join(home, '.local', 'bin', 'claude.exe'), ...whereExe('claude')]
-    : [`${home}/.local/bin/claude`, '/opt/homebrew/bin/claude', '/usr/local/bin/claude', `${home}/.claude/local/claude`]
+    : [`${home}/.local/bin/claude`, '/opt/homebrew/bin/claude', '/usr/local/bin/claude', `${home}/.claude/local/claude`,
+        // Linux: wherever PATH has it (mise, asdf, npm prefixes…), and the system package.
+        ...(process.env.PATH ?? '').split(':').filter(Boolean).map((dir) => join(dir, 'claude')), '/usr/bin/claude']
   for (const p of candidates) {
     try {
       accessSync(p, constants.X_OK)

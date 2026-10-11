@@ -128,8 +128,12 @@ export async function textOf(path: string): Promise<string | null> {
   if (isChat(path)) return readFile(path, 'utf8').then(chatText, () => null)
   if (nativeExtracts(path)) return nativeText(path)
   const ext = extname(path).slice(1).toLowerCase()
-  if (ext === 'pdf' && process.platform === 'darwin') { // PDFKit through JXA; elsewhere PDFs aren't indexed yet
+  if (ext === 'pdf' && process.platform === 'darwin') { // PDFKit through JXA
     const r = await run('osascript', ['-l', 'JavaScript', '-e', PDF_TEXT, path]).catch(() => null)
+    return r?.code === 0 ? r.stdout : null
+  }
+  if (ext === 'pdf' && process.platform === 'linux') { // poppler's pdftotext when it's installed; Windows doesn't index PDFs yet
+    const r = await run('pdftotext', ['-q', '-enc', 'UTF-8', path, '-']).catch(() => null)
     return r?.code === 0 ? r.stdout : null
   }
   if (['docx', 'doc', 'rtf', 'odt'].includes(ext) && process.platform === 'darwin') {
