@@ -7,13 +7,13 @@ import { flip, Menu, MOTION, reducedMotion, type Box, useLayoutEffectInBrowser }
 import { useApp } from '../../app/store'
 import { play } from '../../sound'
 import { Composer } from './Composer'
-import { basename, chatFilePath, contactsLine, greeting, modelChoice, POLICY_CAPTION, uuid } from './logic'
+import { basename, chatFilePath, contactsLine, greeting, modelChoice, uuid } from './logic'
 import { cancel, editChat, insertChat, isRunning, saveChat, send, sync, upload, workspaceRoot } from './session'
 import { AgentAvatar, Transcript } from './Transcript'
 import s from './chat.module.css'
 
 /** Where the new-chat page's pieces were just before a new chat starts, so they can glide. */
-interface Glide { composer: Box; caption: Box; header: Box | null }
+interface Glide { composer: Box; header: Box | null }
 
 /** The new-chat page (greeting over a centered composer) gliding into a transcript once you send. */
 export function ChatScreen() {
@@ -58,10 +58,9 @@ export function ChatScreen() {
     void send({ chatId: target.id, text, files, ...options() })
   }
 
-  // The composer and caption keep their DOM across the switch; FLIP stands in for matchedGeometryEffect.
+  // The composer keeps its DOM across the switch; FLIP stands in for matchedGeometryEffect.
   const screen = useRef<HTMLDivElement>(null)
   const composerRef = useRef<HTMLDivElement>(null)
-  const captionRef = useRef<HTMLDivElement>(null)
   const headerRef = useRef<HTMLDivElement>(null)
   const glide = useRef<Glide | null>(null)
   const [ghost, setGhost] = useState<Box | null>(null)
@@ -77,10 +76,9 @@ export function ChatScreen() {
       const r = el.getBoundingClientRect()
       return { left: r.left - base.left, top: r.top - base.top, width: r.width, height: r.height }
     }
-    if (!reducedMotion() && composerRef.current && captionRef.current) {
+    if (!reducedMotion() && composerRef.current) {
       glide.current = {
         composer: composerRef.current.getBoundingClientRect(),
-        caption: captionRef.current.getBoundingClientRect(),
         header: rect(headerRef.current)
       }
     }
@@ -99,7 +97,6 @@ export function ChatScreen() {
     glide.current = null
     if (!g || !chat) return
     if (composerRef.current) flip(composerRef.current, g.composer, MOTION.settle)
-    if (captionRef.current) flip(captionRef.current, g.caption, MOTION.settle)
     setGhost(g.header)
     setEntering(true)
   }, [chat?.id])
@@ -185,7 +182,6 @@ export function ChatScreen() {
             onStop={() => chat && cancel(chat.id)}
           />
         </div>
-        <div ref={captionRef} className={s.caption}>{POLICY_CAPTION[settings.approvalPolicy] ?? POLICY_CAPTION['Always ask']}</div>
       </div>
       {centered ? <div className={s.spacerBottom} /> : null}
       {ghost && !centered && (

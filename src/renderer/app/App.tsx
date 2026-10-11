@@ -17,7 +17,7 @@ import { Rail, SECTION_INFO } from './Rail'
 import { Sidebar } from './Sidebar'
 import { useBackgroundTurns } from '../features/chat/background'
 import { AppProvider, useApp, type AppState } from './store'
-import { TitleBar } from './TitleBar'
+import { TitleBar, toggleSidebar } from './TitleBar'
 import './app.css'
 
 /** main.tsx's route: the onboarding window (src/main/onboarding.ts) loads `#onboarding` and gets only Onboarding. */
@@ -75,18 +75,22 @@ function Shell() {
     else setSetting('soundMuted', c.muted)
   }), [setSetting])
 
-  // ⌘, opens Settings.
+  // ⌘, opens Settings; ⌘\ shows or hides the sidebar.
+  const sidebarHidden = !!state.settings?.sidebarHidden
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey && e.key === ',') {
         e.preventDefault()
         play('open')
         openSettings()
+      } else if (e.metaKey && e.key === '\\') {
+        e.preventDefault()
+        toggleSidebar(sidebarHidden, setSetting)
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [openSettings])
+  }, [openSettings, setSetting, sidebarHidden])
 
   const title = state.section === 'chat'
     ? state.chats.find((c) => c.id === state.chatId)?.title ?? 'New chat'
@@ -97,7 +101,7 @@ function Shell() {
       {state.section === 'code' ? <CodeTitleBar /> : <TitleBar title={title} />}
       <div className="app-body">
         <Rail />
-        <div className="panel">
+        <div className={`panel ${sidebarHidden ? 'sidebar-hidden' : ''}`}>
           <Sidebar />
           <main className="content">
             {state.section === 'chat' && <ChatScreen />}

@@ -483,6 +483,8 @@ export interface Settings {
   soundVolume: number
   /** A soft key tick while a reply streams in. */
   soundStreaming: boolean
+  /** The section sidebar folded away (titlebar toggle, ⌘\). */
+  sidebarHidden: boolean
   autoIndex: boolean
   notifyApprovals: boolean
   notifyDone: boolean
@@ -514,6 +516,7 @@ export const DEFAULT_SETTINGS: Settings = {
   soundMuted: false,
   soundVolume: 0.5,
   soundStreaming: false,
+  sidebarHidden: false,
   autoIndex: true,
   notifyApprovals: true,
   notifyDone: true,
