@@ -9,7 +9,7 @@
 }
 .b-pill:hover { background: var(--wash); }
 /* Filled: the text color as the fill (black on light, near-white on dark). */
-.b-pill.filled { background: var(--fill); color: var(--content); box-shadow: none; }
+.b-pill.filled { background: var(--fill); color: var(--on-fill); box-shadow: none; }
 .b-pill.filled:hover { background: var(--fill-hover); }
 .b-pill:disabled { opacity: 0.5; pointer-events: none; }
 

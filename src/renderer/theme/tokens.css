@@ -28,6 +28,7 @@
   /* Filled buttons (Send, Ask, filled pills). */
   --fill: #000000;
   --fill-hover: #2a2a2a;
+  --on-fill: #ffffff;
   /* Cards, menus, modals and fields: white on light, a step above the content on dark. */
   --surface: #ffffff;
   /* Channels for alpha tints, as rgb(var(--ink) / 0.06): ink is the tint that darkens on light and lightens on dark. */
@@ -103,8 +104,10 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-/* macOS: the window's vibrancy (src/main/index.ts) frosts the desktop behind the chrome and sidebar; content stays opaque. */
+/* macOS: the window's vibrancy (src/main/index.ts) frosts the desktop behind the whole window: the chrome clearest, the
+   sidebar and content a milkier frost. Cards, menus and modals (--surface) stay solid. */
 [data-platform='mac'] {
+  --content: rgba(255, 255, 255, 0.78);
   --chrome: rgba(237, 237, 238, 0.2);
   --sidebar: linear-gradient(to bottom, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.7));
 }
@@ -125,6 +128,7 @@
     --content: #161618;
     --fill: #ececee;
     --fill-hover: #ffffff;
+    --on-fill: #161618;
     --surface: #222325;
     --ink: 255 255 255;
     --surface-rgb: 34 35 37;
@@ -144,6 +148,7 @@
     --orange: #ff9f0a;
   }
   :root[data-platform='mac']:not([data-window='onboarding']) {
+    --content: rgba(22, 22, 24, 0.72);
     --chrome: rgba(24, 24, 26, 0.25);
     --sidebar: linear-gradient(to bottom, rgba(32, 33, 35, 0.6), rgba(30, 31, 33, 0.7));
   }

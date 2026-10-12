@@ -165,11 +165,11 @@
 .glass { color: var(--text); background: rgb(var(--surface-rgb) / 0.6); box-shadow: 0 0 0 0.5px rgb(var(--ink) / 0.1), 0 1px 3px rgba(0, 0, 0, 0.08); }
 .glass:hover { background: var(--surface); }
 .mic { color: var(--secondary); }
-.send { background: var(--fill); color: var(--content); }
+.send { background: var(--fill); color: var(--on-fill); }
 .send:hover { background: var(--fill-hover); }
 .send.idle { opacity: 0.4; transition: transform 150ms var(--ease-recoil), background-color var(--state), opacity var(--dur-lines) var(--ease-lines); }
 .sendSpinner {
-  width: 15px; height: 15px; border-radius: 50%; border: 2px solid var(--content); border-right-color: transparent;
+  width: 15px; height: 15px; border-radius: 50%; border: 2px solid var(--on-fill); border-right-color: transparent;
   animation: spin 0.8s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }

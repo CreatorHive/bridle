@@ -108,7 +108,7 @@
 }
 .open { width: 96px; flex: none; background: var(--surface); box-shadow: inset 0 0 0 1px var(--border); }
 .open:hover { background: var(--wash); }
-.ask { flex: 1; background: var(--fill); color: var(--content); }
+.ask { flex: 1; background: var(--fill); color: var(--on-fill); }
 .ask:hover { background: var(--fill-hover); }
 .relatedTitle { margin: 22px 0 8px 4px; font-size: var(--fs-14); font-weight: 600; }
 .related { width: 100%; display: flex; align-items: center; gap: 12px; padding: 6px; border-radius: 10px; --press: 0.98; }
