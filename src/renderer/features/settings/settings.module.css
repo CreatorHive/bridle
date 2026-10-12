@@ -34,8 +34,8 @@
   background: var(--wash); color: var(--secondary); font-size: var(--fs-14); font-weight: 600;
 }
 .photo { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
-.corner { position: absolute; right: -3px; bottom: -3px; box-sizing: content-box; padding: 2px; border-radius: 50%; background: #fff; }
-.logoBadge { background: #fff; box-shadow: inset 0 0 0 1px var(--border); }
+.corner { position: absolute; right: -3px; bottom: -3px; box-sizing: content-box; padding: 2px; border-radius: 50%; background: var(--surface); }
+.logoBadge { background: var(--surface); box-shadow: inset 0 0 0 1px var(--border); }
 .badgeSpinner { flex: none; width: 32px; height: 32px; display: grid; place-items: center; }
 
 .chips { display: flex; align-items: center; gap: 4px; overflow: hidden; white-space: nowrap; }
@@ -68,11 +68,11 @@
 /* Memory import (MemoryImportCard) */
 .segmented { display: inline-flex; padding: 2px; border-radius: 8px; background: var(--field); }
 .segment { height: 26px; padding: 0 10px; border-radius: 6px; font-size: var(--fs-13); color: var(--secondary); --press: 0.97; }
-.segment.on { background: #fff; color: var(--text); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); }
+.segment.on { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); }
 .importBox { display: flex; flex-direction: column; gap: 10px; padding: 12px 10px 12px 0; }
 .importBox > span { font-size: var(--fs-14); }
 .importBox textarea {
-  height: 150px; padding: 8px; border: 0; outline: none; resize: none; border-radius: var(--r-control); background: #fff;
+  height: 150px; padding: 8px; border: 0; outline: none; resize: none; border-radius: var(--r-control); background: var(--surface);
   font-family: var(--mono); font-size: calc(12.5px * var(--zoom)); box-shadow: inset 0 0 0 1px var(--separator);
 }
 .importBox textarea::placeholder { color: var(--placeholder); }

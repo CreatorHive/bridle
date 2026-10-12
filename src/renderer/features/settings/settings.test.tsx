@@ -56,7 +56,7 @@ describe('screens render', () => {
 
   it('renders every settings page', () => {
     const expected: Record<string, string[]> = {
-      general: ['Workspace', 'Keep the index fresh', 'Send test', 'Replay onboarding'],
+      general: ['Workspace', 'Appearance', 'Keep the index fresh', 'Send test', 'Replay onboarding'],
       profile: ['Time zone', 'Open USER.md'],
       agent: ['Saved to IDENTITY.md', 'Saved to agent/avatar.png', 'Choose…', 'Open SOUL.md', 'Open MEMORY.md',
         'Bring your memory from ChatGPT or Claude Code', 'Copy and open ChatGPT', 'Claude Code', '2. Paste its answer', 'Import'],

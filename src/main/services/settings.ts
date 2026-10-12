@@ -50,6 +50,7 @@ export function coerce<K extends SettingKey>(key: K, value: unknown): Settings[K
   const s = String(value)
   if (key === 'provider' && !(s in PROVIDERS)) return fallback
   if (key === 'approvalPolicy' && !POLICIES.includes(s)) return fallback
+  if (key === 'appearance' && !['System', 'Light', 'Dark'].includes(s)) return fallback
   return s as Settings[K]
 }
 

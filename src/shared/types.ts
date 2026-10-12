@@ -367,6 +367,9 @@ export interface Loop {
 
 // MARK: Agent
 
+/** Light, dark, or following macOS / Windows (settings key "appearance"). */
+export type Appearance = 'System' | 'Light' | 'Dark'
+
 /** Approval policies (settings key "approvalPolicy"). */
 export type ApprovalPolicy = 'Always ask' | 'Allow app actions' | 'Allow everything'
 
@@ -479,6 +482,7 @@ export interface Settings {
   localEndpoint: string
   embeddings: string
   approvalPolicy: ApprovalPolicy
+  appearance: Appearance
   soundMuted: boolean
   soundVolume: number
   /** A soft key tick while a reply streams in. */
@@ -513,6 +517,7 @@ export const DEFAULT_SETTINGS: Settings = {
   localEndpoint: '',
   embeddings: 'On-device',
   approvalPolicy: 'Always ask',
+  appearance: 'System',
   soundMuted: false,
   soundVolume: 0.5,
   soundStreaming: false,

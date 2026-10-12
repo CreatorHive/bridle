@@ -2,7 +2,7 @@ import { useEffect, useState, type ComponentType } from 'react'
 import { McpServers } from './McpServers'
 import { AutomationsPage } from './AutomationsPage'
 import { Calendar, ChevronsUpDown, CircleCheck, CircleX, File as FileIcon, Folder, Globe, Key, Mail, Package, Search, Server, Smartphone, Sparkles, User } from 'lucide-react'
-import { PROVIDERS, type ApprovalPolicy, type LocalModel, type PhoneStatus, type Provider, type WorkspaceFile } from '../../../shared/types'
+import { PROVIDERS, type Appearance, type ApprovalPolicy, type LocalModel, type PhoneStatus, type Provider, type WorkspaceFile } from '../../../shared/types'
 import { Avatar, Button, ChoiceMenu, Menu, Pill, SectionLabel, SettingsCard, SettingsRow, Toggle } from '../../components'
 import { useApp, type SettingsPage } from '../../app/store'
 import { play } from '../../sound'
@@ -61,6 +61,10 @@ function General() {
       <SettingsCard>
         <SettingsRow label="Workspace" description={`Everything ${agent} knows lives in this folder`}>
           <ValueField icon={<Folder size={14} />} value={s_.workspace} label="Workspace" />
+        </SettingsRow>
+        <SettingsRow label="Appearance" description="Light, dark, or matching your system">
+          <ChoiceMenu label="Appearance" value={s_.appearance} options={['System', 'Light', 'Dark']}
+            onChange={(v) => setSetting('appearance', v as Appearance)} />
         </SettingsRow>
         <SettingsRow label="Keep the index fresh" description="Re-index files as they change, for semantic search">
           <Toggle label="Keep the index fresh" checked={s_.autoIndex} onChange={(v) => setSetting('autoIndex', v)} />

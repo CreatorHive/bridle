@@ -24,7 +24,7 @@
 .column {
   flex: none; width: 262px; min-height: 0; padding: 12px; border-radius: 16px;
   display: flex; flex-direction: column; gap: 10px;
-  background: #f7f7f8; transition: background-color var(--state);
+  background: var(--card); transition: background-color var(--state);
 }
 .column.target { background: var(--brand-50); }
 .columnHead { display: flex; align-items: center; gap: 8px; padding: 0 4px; }
@@ -34,7 +34,7 @@
 
 .newTask {
   flex: none; width: 100%; padding: 12px; border-radius: 12px; border: 0; outline: none;
-  background: #fff; font-size: calc(13.5px * var(--zoom));
+  background: var(--surface); font-size: calc(13.5px * var(--zoom));
   box-shadow: inset 0 0 0 1px rgba(32, 91, 255, 0.6);
   animation: fade 150ms ease-in-out both;
 }
@@ -48,7 +48,7 @@
 
 .card {
   flex: none; display: flex; flex-direction: column; gap: 9px; padding: 12px; border-radius: 12px;
-  background: #fff; box-shadow: inset 0 0 0 1px rgba(223, 224, 226, 0.6), 0 1px 2px rgba(0, 0, 0, 0.03);
+  background: var(--surface); box-shadow: inset 0 0 0 1px rgb(var(--border-rgb) / 0.6), 0 1px 2px rgba(0, 0, 0, 0.03);
   transition: box-shadow var(--state);
   /* Cards arriving (a move, a filter, a sync) fade in on MOTION.state. */
   animation: fade 150ms ease-in-out both;
@@ -59,7 +59,7 @@
 @keyframes fade { from { opacity: 0; } }
 /* The drag preview (.draggable's): the title on a small white card, drawn offscreen for setDragImage. */
 .dragPreview {
-  position: fixed; top: -1000px; left: 0; max-width: 240px; padding: 8px; border-radius: 8px; background: #fff;
+  position: fixed; top: -1000px; left: 0; max-width: 240px; padding: 8px; border-radius: 8px; background: var(--surface);
   font-family: var(--font); font-size: var(--fs-13); font-weight: 500; color: var(--text);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
@@ -83,7 +83,7 @@
 /* Detail panel */
 .detail {
   flex: none; width: min(420px, 42vw); margin: 0 16px 16px 0; min-height: 0;
-  display: flex; flex-direction: column; background: #fff; border-radius: 16px;
+  display: flex; flex-direction: column; background: var(--surface); border-radius: 16px;
   box-shadow: inset 0 0 0 1px var(--border), 0 4px 24px rgba(0, 0, 0, 0.06);
   /* Slides in from the trailing edge, fading, on MOTION.send, both ways. */
   animation: slide-in var(--dur-send) var(--ease-send) both;
@@ -103,7 +103,7 @@
 .titleField { width: 100%; border: 0; outline: none; padding: 0; resize: none; overflow: hidden; background: none; font-family: inherit; }
 .titleField::placeholder { color: var(--placeholder); }
 
-.properties { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 12px; background: rgba(241, 241, 241, 0.6); }
+.properties { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 12px; background: rgb(var(--wash-rgb) / 0.6); }
 .property { display: flex; align-items: baseline; gap: 12px; }
 .property > :first-child { flex: none; width: 72px; font-size: calc(12.5px * var(--zoom)); color: var(--tertiary); }
 .value {
@@ -129,7 +129,7 @@
 .notes { display: flex; flex-direction: column; gap: 6px; }
 .notes textarea {
   min-height: 180px; padding: 8px; border: 0; outline: none; resize: vertical; border-radius: 10px;
-  background: rgba(241, 241, 241, 0.6); font-size: calc(13.5px * var(--zoom)); line-height: 1.45;
+  background: rgb(var(--wash-rgb) / 0.6); font-size: calc(13.5px * var(--zoom)); line-height: 1.45;
 }
 .savedTo { font-size: calc(11.5px * var(--zoom)); color: var(--tertiary); }
 

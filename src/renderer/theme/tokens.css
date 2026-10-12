@@ -1,4 +1,5 @@
-/* Bridle's look: colors, brand, type, radii and motion (MOTION, tactile press). Light mode only.
+/* Bridle's look: colors, brand, type, radii and motion (MOTION, tactile press). Dark mode follows prefers-color-scheme,
+   which Settings → General → Appearance drives through nativeTheme (src/main/ipc.ts applyAppearance).
    Geist and Geist Mono: Vercel, SIL OFL (fonts/OFL.txt). */
 
 @font-face { font-family: Geist; src: url('./fonts/Geist-Regular.ttf') format('truetype'); font-weight: 400; }
@@ -24,6 +25,16 @@
   --chrome: #ededee;
   --sidebar: linear-gradient(to bottom, #f6f6f7, #fafafa);
   --content: #ffffff;
+  /* Filled buttons (Send, Ask, filled pills). */
+  --fill: #000000;
+  --fill-hover: #2a2a2a;
+  /* Cards, menus, modals and fields: white on light, a step above the content on dark. */
+  --surface: #ffffff;
+  /* Channels for alpha tints, as rgb(var(--ink) / 0.06): ink is the tint that darkens on light and lightens on dark. */
+  --ink: 0 0 0;
+  --surface-rgb: 255 255 255;
+  --wash-rgb: 241 241 241;
+  --border-rgb: 223 224 226;
 
   /* Settings palette */
   --panel-rail: #fafafa;
@@ -96,6 +107,46 @@
 [data-platform='mac'] {
   --chrome: rgba(237, 237, 238, 0.2);
   --sidebar: linear-gradient(to bottom, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.7));
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-window='onboarding']) {
+    color-scheme: dark;
+    --text: #ececee;
+    --secondary: #b3b5ba;
+    --tertiary: #8a8d92;
+    --placeholder: #5e6166;
+    --border: #353639;
+    --wash: #26272a;
+    --hover: rgba(255, 255, 255, 0.06);
+    --selected: rgba(255, 255, 255, 0.1);
+    --chrome: #1b1b1d;
+    --sidebar: linear-gradient(to bottom, #202123, #1e1f21);
+    --content: #161618;
+    --fill: #ececee;
+    --fill-hover: #ffffff;
+    --surface: #222325;
+    --ink: 255 255 255;
+    --surface-rgb: 34 35 37;
+    --wash-rgb: 38 39 42;
+    --border-rgb: 53 54 57;
+    --panel-rail: #1c1d1f;
+    --card: #1f2022;
+    --field: #2a2b2e;
+    --separator: rgba(255, 255, 255, 0.08);
+    /* Light blue tints become deep blue ones; the dark blues used as text on them become light. */
+    --brand-25: #13233f;
+    --brand-50: #1b3563;
+    --brand-700: #a9c4ff;
+    --brand-800: #cddcff;
+    --green: #30d158;
+    --red: #ff453a;
+    --orange: #ff9f0a;
+  }
+  :root[data-platform='mac']:not([data-window='onboarding']) {
+    --chrome: rgba(24, 24, 26, 0.25);
+    --sidebar: linear-gradient(to bottom, rgba(32, 33, 35, 0.6), rgba(30, 31, 33, 0.7));
+  }
 }
 
 html, body, #root {
