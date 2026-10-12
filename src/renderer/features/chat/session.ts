@@ -137,7 +137,8 @@ async function reply(o: SendOptions, id: string, prompt: string): Promise<void> 
   function handle(event: AgentEvent) {
     switch (event.type) {
       case 'session': return editChat(chatId, (c) => ({ ...c, sessionID: event.session }))
-      case 'status': return update((m) => (m.text ? {} : { status: event.status }))
+      // After the reply's first words too: a long command then shows as running under the trace.
+      case 'status': return update(() => ({ status: event.status }))
       case 'trace': return update((m) => ({
         trace: [...(m.trace ?? []), event.line],
         ...(event.call ? { calls: [...(m.calls ?? []), { ...event.call, step: m.trace?.length ?? 0 }] } : {})

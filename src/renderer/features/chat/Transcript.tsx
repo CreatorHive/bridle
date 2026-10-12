@@ -101,14 +101,15 @@ function AgentMessage({ message, agentName, fresh, live }: { message: Message; a
   const [copied, setCopied] = useState(false)
   const trace = message.trace ?? []
   const text = extractActions(message.text).text
-  const files = useFound(message.status == null ? mentionedFiles(text) : [])
+  const working = message.status != null
+  const files = useFound(working ? [] : mentionedFiles(text))
   return (
     <div className={`${s.agent} ${fresh ? 'b-reply-entry' : ''}`} onMouseLeave={() => setCopied(false)}>
-      <AgentAvatar name={agentName} thinking={message.status != null} />
+      <AgentAvatar name={agentName} thinking={working} />
       <div className={s.agentBody}>
         <div className={s.agentName}>{agentName}</div>
-        {message.status != null ? (
-          <WorkingRow status={message.status} workers={message.workers ?? []} />
+        {working && !text ? (
+          <WorkingRow status={message.status!} workers={message.workers ?? []} />
         ) : (
           <>
             {/* An action block streams in as raw JSON; hide it until it becomes a card. A reply that
@@ -125,7 +126,8 @@ function AgentMessage({ message, agentName, fresh, live }: { message: Message; a
               </div>
             )}
             {trace.length > 0 && <Trace trace={trace} calls={message.calls ?? []} />}
-            <div className={s.actions}>
+            {/* Still going after its first words (a tool running): the working row under what it did so far. */}
+            {working ? <WorkingRow status={message.status!} workers={message.workers ?? []} /> : <div className={s.actions}>
               <Button cue={null} className={s.actionButton} title="Copy" aria-label="Copy" onClick={() => {
                 void navigator.clipboard.writeText(message.text)
                 play('success', { emphasis: 'subtle' })
@@ -136,7 +138,7 @@ function AgentMessage({ message, agentName, fresh, live }: { message: Message; a
               <Button className={s.actionButton} title="Read aloud" aria-label="Read aloud" onClick={() => speak(message.text)}>
                 <Volume2 size={14} />
               </Button>
-            </div>
+            </div>}
           </>
         )}
       </div>
