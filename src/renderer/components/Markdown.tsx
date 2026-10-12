@@ -2,7 +2,7 @@ import { createElement, Fragment, useEffect, useMemo, useRef, useState, type Rea
 import { reducedMotion } from './motion'
 import { useLayoutEffectInBrowser } from './Presence'
 import { parseBlocks, type Block, type Inline } from './parseMarkdown'
-import { CHAR_KEYFRAMES, FADE, graphemeCount, graphemes, pace, renderedCount, settled } from './stream'
+import { charKeyframes, FADE, graphemeCount, graphemes, pace, renderedCount, settled } from './stream'
 
 /** Rendered characters from `from` on fade in, each starting at `at(k)` (ms, document time). */
 interface Reveal { from: number; at: (k: number) => number }
@@ -69,20 +69,24 @@ export function Markdown({ text, className = '' }: { text: string; className?: s
 
 const animated = new WeakSet<Element>()
 
-/** Markdown whose new characters fade in as the text grows, paced
- *  evenly (≤ 90/s; a burst clears in about half a second), each from a soft violet through pink into
+/** Markdown whose new characters fade in as the text grows, at the rate the text arrives
+ *  (≥ 90/s; never more than half a second behind), each from a soft violet through pink into
  *  the text color over 0.9 s. Text present on mount shows at once unless `fromStart` (a reply that is
  *  still arriving, whose first chunk should fade in too). Settled characters fold back into plain text
  *  nodes, so only the ~80 characters mid-fade are spans. Reduced motion: plain Markdown. */
 export function StreamingMarkdown({ text, fromStart = false, className = '' }: { text: string; fromStart?: boolean; className?: string }) {
   const blocks = useMemo(() => parseBlocks(text), [text])
   const total = renderedCount(blocks)
-  const clock = useRef<{ baseline: number; arrivals: number[] } | null>(null)
-  clock.current ??= { baseline: fromStart ? 0 : total, arrivals: [] }
+  const clock = useRef<{ baseline: number; arrivals: number[]; chunk: number | null } | null>(null)
+  clock.current ??= { baseline: fromStart ? 0 : total, arrivals: [], chunk: null }
   const { baseline, arrivals } = clock.current
   const now = performance.now()
-  // Idempotent: only characters without an arrival yet are scheduled.
-  pace(arrivals, total - baseline - arrivals.length, now)
+  // Idempotent: only characters without an arrival yet are scheduled, over the time since the last chunk.
+  const backlog = total - baseline - arrivals.length
+  if (backlog > 0) {
+    pace(arrivals, backlog, now, clock.current.chunk === null ? Infinity : now - clock.current.chunk)
+    clock.current.chunk = now
+  }
 
   const motion = !reducedMotion()
   const done = settled(arrivals, now)
@@ -94,10 +98,13 @@ export function StreamingMarkdown({ text, fromStart = false, className = '' }: {
   // (a new chunk) never restart it.
   const root = useRef<HTMLDivElement>(null)
   useLayoutEffectInBrowser(() => {
-    root.current?.querySelectorAll<HTMLElement>('.b-char').forEach((el) => {
+    const chars = root.current?.querySelectorAll<HTMLElement>('.b-char')
+    if (!chars?.length) return
+    const keyframes = charKeyframes(getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#1a1b1e')
+    chars.forEach((el) => {
       if (animated.has(el) || typeof el.animate !== 'function') return
       animated.add(el)
-      el.animate(CHAR_KEYFRAMES, { duration: FADE, fill: 'both' }).startTime = Number(el.dataset.at)
+      el.animate(keyframes, { duration: FADE, fill: 'both' }).startTime = Number(el.dataset.at)
     })
   })
 
