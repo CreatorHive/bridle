@@ -1,5 +1,6 @@
-import { ipcMain, shell as electronShell } from 'electron'
+import { ipcMain, nativeTheme, shell as electronShell } from 'electron'
 import { API_METHODS, channel, type GroupName, type InvokeAPI } from '../shared/api'
+import type { Appearance } from '../shared/types'
 import { automations } from './automations'
 import { sideChat } from './sidechat'
 import { phone, startBridge } from './bridge'
@@ -47,13 +48,19 @@ const about: InvokeAPI['about'] = {
   }
 }
 
+/** Appearance → nativeTheme: the page's prefers-color-scheme and the macOS glass both follow it. */
+export function applyAppearance(a: Appearance): void {
+  nativeTheme.themeSource = a === 'Dark' ? 'dark' : a === 'Light' ? 'light' : 'system'
+}
+
 /** Every contract group, implemented. Typed against BridleAPI, so a missing method fails typecheck. */
-/** Settings, plus IDENTITY.md following the agent's name. */
+/** Settings, plus IDENTITY.md following the agent's name and the theme following Appearance. */
 const settingsService: InvokeAPI['settings'] = {
   ...settings,
   async set(key, value) {
     await settings.set(key, value)
     if (key === 'agentName') await renameIdentity(String(value)).catch(() => {})
+    if (key === 'appearance') applyAppearance(value as Appearance)
   }
 }
 

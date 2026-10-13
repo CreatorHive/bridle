@@ -1,10 +1,10 @@
-import { app, BrowserWindow, dialog, Menu, nativeImage, shell } from 'electron'
+import { app, BrowserWindow, dialog, Menu, nativeImage, nativeTheme, shell } from 'electron'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { installCrashLogging, watchWindow } from './log'
 import icon from '../../resources/icon.png?asset' // the Bridle mark (build/icon.icns for packaged builds)
 import { emit } from './events'
-import { registerIpc } from './ipc'
+import { applyAppearance, registerIpc } from './ipc'
 import { startNotch } from './notch'
 import { startAutomations } from './automations'
 import { startSideChat, stopSideChat } from './sidechat'
@@ -16,6 +16,10 @@ import { startWatcher } from './watch'
 import { openedAtLogin, startTray } from './tray'
 import { startHeartbeat } from './heartbeat'
 import { startDreams } from './dreams'
+
+/** Windows/Linux paint the chrome strip and its system buttons themselves: light or dark to match the page. */
+const chrome = () => nativeTheme.shouldUseDarkColors
+  ? { color: '#232325', symbolColor: '#ECECEE', height: 38 } : { color: '#EDEDEE', symbolColor: '#1A1B1E', height: 38 }
 
 function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
@@ -29,8 +33,7 @@ function createWindow(): BrowserWindow {
       // Frosted glass, focused or not, through the chrome and sidebar's translucent tokens ([data-platform='mac']).
       ? { titleBarStyle: 'hiddenInset' as const, trafficLightPosition: { x: 14, y: 13 },
           vibrancy: 'sidebar' as const, visualEffectState: 'active' as const, backgroundColor: '#00000000' }
-      : { titleBarStyle: 'hidden' as const, titleBarOverlay: { color: '#EDEDEE', symbolColor: '#1A1B1E', height: 38 },
-          backgroundColor: '#EDEDEE' }),
+      : { titleBarStyle: 'hidden' as const, titleBarOverlay: chrome(), backgroundColor: chrome().color }),
     icon, // Linux/Windows; macOS takes the Dock icon below
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -62,6 +65,15 @@ function createWindow(): BrowserWindow {
   win.webContents.on('will-navigate', (e, url) => {
     if (url !== win.webContents.getURL()) e.preventDefault()
   })
+
+  if (process.platform !== 'darwin') {
+    const repaint = () => {
+      win.setTitleBarOverlay(chrome())
+      win.setBackgroundColor(chrome().color)
+    }
+    nativeTheme.on('updated', repaint)
+    win.on('closed', () => nativeTheme.off('updated', repaint))
+  }
 
   watchWindow(win)
   loadRenderer(win)
@@ -97,6 +109,7 @@ app.whenReady().then(async () => {
   startAutomations() // before the window, so it sees the window load
   await ensureWorkspace()
   const onboarded = await settings.get('onboarded')
+  applyAppearance(await settings.get('appearance'))
   createWindow()
   if (!onboarded) showOnboarding()
   startWatcher()

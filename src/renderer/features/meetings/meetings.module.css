@@ -17,7 +17,7 @@
 .outline { padding: 0 14px; color: var(--text); font-size: var(--fs-13); font-weight: 500; box-shadow: inset 0 0 0 1px var(--border); }
 .code { margin-top: -12px; font-size: calc(12.5px * var(--zoom)); color: var(--tertiary); user-select: text; }
 
-.section { padding: 16px; border-radius: 14px; background: rgba(241, 241, 241, 0.5); display: flex; flex-direction: column; gap: 10px; }
+.section { padding: 16px; border-radius: 14px; background: rgb(var(--wash-rgb) / 0.5); display: flex; flex-direction: column; gap: 10px; }
 .section h3 { margin: 0; font-size: var(--fs-13); font-weight: 600; color: var(--secondary); }
 .muted { font-size: var(--fs-13); color: var(--secondary); }
 .buttons { display: flex; gap: 8px; }

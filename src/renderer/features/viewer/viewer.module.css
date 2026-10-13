@@ -2,7 +2,7 @@
 
 .panel {
   flex: none; width: min(480px, 48vw); min-height: 0; display: flex; flex-direction: column;
-  background: #fff; border-left: 1px solid var(--border);
+  background: var(--content); border-left: 1px solid var(--border);
   animation: slide-in 250ms var(--ease-modal);
 }
 @keyframes slide-in { from { opacity: 0; transform: translateX(24px); } }
@@ -31,7 +31,7 @@
 }
 .editor {
   flex: 1; min-height: 0; margin: 0; padding: 16px; border: 0; outline: none; resize: none;
-  font-family: var(--mono); font-size: var(--fs-13); line-height: 1.5; background: #fff;
+  font-family: var(--mono); font-size: var(--fs-13); line-height: 1.5; background: var(--content);
 }
 .media { flex: 1; min-height: 0; display: grid; place-items: center; padding: 16px; background: var(--wash); }
 .media img { max-width: 100%; max-height: 100%; object-fit: contain; }

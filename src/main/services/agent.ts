@@ -428,6 +428,8 @@ async function claudeCLI(chatId: string, state: RunState, prompt: string, sessio
           for (const b of (event.message?.content ?? []) as Record<string, any>[]) {
             if (b.type === 'tool_result' && typeof b.tool_use_id === 'string') send({ type: 'result', id: b.tool_use_id, result: cap(resultText(b.content)), error: b.is_error === true })
           }
+          // The tool is done; the model reads what came back.
+          send({ type: 'status', status: 'Thinking' })
           break
         }
         case 'control_request': {

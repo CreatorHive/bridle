@@ -5,7 +5,7 @@
   padding-top: 90px; background: rgba(0, 0, 0, 0.2); animation: fade 250ms var(--ease-modal);
 }
 .panel {
-  width: 640px; max-width: calc(100vw - 32px); background: #fff; border-radius: 16px;
+  width: 640px; max-width: calc(100vw - 32px); background: var(--surface); border-radius: 16px;
   box-shadow: inset 0 0 0 1px var(--border), 0 12px 30px rgba(0, 0, 0, 0.12);
   overflow: hidden; transform-origin: top; animation: pop 250ms var(--ease-modal);
 }

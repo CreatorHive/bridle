@@ -9,7 +9,7 @@
 .actions { display: flex; gap: 10px; }
 .add {
   display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border-radius: 999px;
-  background: #fff; box-shadow: inset 0 0 0 1px var(--border); font-size: calc(13.5px * var(--zoom)); font-weight: 500; white-space: nowrap;
+  background: var(--surface); box-shadow: inset 0 0 0 1px var(--border); font-size: calc(13.5px * var(--zoom)); font-weight: 500; white-space: nowrap;
 }
 .add:hover { background: var(--wash); }
 .search {
@@ -34,10 +34,10 @@
 .drop.dropping { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100%25' height='100%25' rx='16' fill='none' stroke='%23205BFF' stroke-width='2.4' stroke-dasharray='5 4'/%3E%3C/svg%3E"), var(--brand-50); }
 .dropIcon {
   width: 36px; height: 36px; display: grid; place-items: center; border-radius: 10px;
-  background: #fff; box-shadow: inset 0 0 0 1px var(--border); color: var(--secondary);
+  background: var(--surface); box-shadow: inset 0 0 0 1px var(--border); color: var(--secondary);
 }
 .tile {
-  height: 150px; padding: 18px; border-radius: 16px; background: #fff; box-shadow: inset 0 0 0 1px var(--border);
+  height: 150px; padding: 18px; border-radius: 16px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--border);
   display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; text-align: left;
 }
 .tileText { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
@@ -83,7 +83,7 @@
 /* Slides in from the trailing edge, fading, and back out. */
 @keyframes slide-in { from { opacity: 0; transform: translateX(100%); } }
 @keyframes slide-out { to { opacity: 0; transform: translateX(100%); } }
-.card { display: flex; flex-direction: column; gap: 14px; padding: 16px; border-radius: 18px; background: #fff; box-shadow: inset 0 0 0 1px var(--border); }
+.card { display: flex; flex-direction: column; gap: 14px; padding: 16px; border-radius: 18px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--border); }
 .inspectorHead { display: flex; align-items: center; gap: 12px; }
 .inspectorName { font-size: calc(14.5px * var(--zoom)); font-weight: 600; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .meta { font-size: calc(12.5px * var(--zoom)); color: var(--tertiary); }
@@ -91,7 +91,7 @@
 .divider { height: 1px; background: var(--separator); }
 .preview {
   min-height: 200px; max-height: 380px; display: grid; place-items: center; overflow: hidden;
-  border-radius: 12px; background: rgba(241, 241, 241, 0.5); box-shadow: inset 0 0 0 1px var(--border);
+  border-radius: 12px; background: rgb(var(--wash-rgb) / 0.5); box-shadow: inset 0 0 0 1px var(--border);
   animation: fade var(--state) both;
 }
 @keyframes fade { from { opacity: 0; } }
@@ -106,10 +106,10 @@
   height: 38px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   font-size: calc(13.5px * var(--zoom)); font-weight: 500; white-space: nowrap;
 }
-.open { width: 96px; flex: none; background: #fff; box-shadow: inset 0 0 0 1px var(--border); }
+.open { width: 96px; flex: none; background: var(--surface); box-shadow: inset 0 0 0 1px var(--border); }
 .open:hover { background: var(--wash); }
-.ask { flex: 1; background: #000; color: #fff; }
-.ask:hover { background: #222; }
+.ask { flex: 1; background: var(--fill); color: var(--on-fill); }
+.ask:hover { background: var(--fill-hover); }
 .relatedTitle { margin: 22px 0 8px 4px; font-size: var(--fs-14); font-weight: 600; }
 .related { width: 100%; display: flex; align-items: center; gap: 12px; padding: 6px; border-radius: 10px; --press: 0.98; }
 .related:hover { background: var(--hover); }
@@ -120,7 +120,7 @@
 .content.fill { display: flex; flex-direction: column; }
 .drive {
   flex: 1; min-height: 360px; display: flex; flex-direction: column; margin-top: 22px;
-  border-radius: var(--r-card); background: #fff; box-shadow: inset 0 0 0 1px var(--border); overflow: hidden;
+  border-radius: var(--r-card); background: var(--surface); box-shadow: inset 0 0 0 1px var(--border); overflow: hidden;
 }
 .chev { display: grid; place-items: center; width: 16px; height: 16px; color: var(--tertiary); transition: transform 0.15s; }
 .chev.chevOpen { transform: rotate(90deg); }

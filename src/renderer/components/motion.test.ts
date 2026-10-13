@@ -45,7 +45,7 @@ describe('FLIP', () => {
 })
 
 describe('streaming reveal', () => {
-  it('paces a burst: ≤ 90 characters a second, any backlog clear in about half a second', () => {
+  it('paces at the rate text arrives: ≥ 90 characters a second, never more than half a second behind', () => {
     const slow: number[] = []
     pace(slow, 10, 1000)
     expect(slow[0]).toBeCloseTo(1000 + 1000 / 90)
@@ -56,6 +56,11 @@ describe('streaming reveal', () => {
     // A later chunk queues behind characters still waiting.
     pace(burst, 1, 100)
     expect(burst[500]).toBeGreaterThan(500)
+    // 40 characters every 100 ms (400/s): drawn at 400/s, so the lag the first chunk set never grows (at 90/s it would).
+    const fast: number[] = []
+    for (let i = 0; i < 20; i++) pace(fast, 40, i * 100, i ? 100 : Infinity)
+    const lag = (n: number) => fast[n * 40 + 39] - n * 100
+    expect(lag(19)).toBeCloseTo(lag(1))
   })
 
   it('counts characters as drawn: markup is not counted, graphemes stay whole', () => {
