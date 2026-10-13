@@ -1,6 +1,7 @@
 name: Release
 
-# Push a tag like v0.1.0: builds, signs and notarizes the DMG and attaches it to a draft GitHub Release.
+# Push a tag like v0.1.0: builds, signs and notarizes the DMG and builds the Windows installer, and attaches both to a
+# draft GitHub Release.
 # Secrets: MAC_CSC_LINK (base64 Developer ID Application .p12), MAC_CSC_KEY_PASSWORD,
 # APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID.
 on:
@@ -38,3 +39,26 @@ jobs:
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # The unsigned x64 installer, attached to the same draft release. Independent of the mac job, so it ships even
+  # while the signing secrets aren't set.
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx electron-builder --win --publish never
+      - name: Attach to the draft release
+        shell: bash
+        run: |
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --draft --title "$TAG" --notes ""
+          gh release upload "$TAG" dist/*.exe --clobber
+        env:
+          TAG: ${{ github.ref_name }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
